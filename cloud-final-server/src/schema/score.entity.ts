@@ -9,8 +9,8 @@ export class Score {
   audioNumber: string;
 
   @Column()
-  fisrtRankUserId: string;
+  userId: string;
 
   @Column()
-  fisrtRankScore: number;
+  userScore: number;
 }
