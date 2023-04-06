@@ -1,5 +1,7 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
 import { AppService } from './app.service';
+
+const API = '';
 
 @Controller()
 export class AppController {
@@ -8,5 +10,10 @@ export class AppController {
   @Get()
   getHello(): string {
     return this.appService.getHello();
+  }
+
+  @Post()
+  getAudio(): string {
+    return this.appService.getAudio();
   }
 }
