@@ -4,6 +4,7 @@ import { ScoreRequestDto } from '../dto/scoreRequest.dto';
 import { Score } from '../schema/score.entity';
 import { RequestHistory } from '../schema/requestHistory.entity';
 import { ScoreService } from './score.service';
+import { AudioResponseDto } from 'src/dto/audioResponse.dto';
 
 @Controller('/api')
 export class ScoreController {
@@ -12,7 +13,7 @@ export class ScoreController {
   @Post('/audio')
   async getAudio(
     @Body() audioRequestDto: AudioRequestDto,
-  ): Promise<RequestHistory> {
+  ): Promise<AudioResponseDto> {
     return await this.scoreService.getAudio(audioRequestDto);
   }
 
