@@ -12,5 +12,8 @@ export class Score {
   userId: string;
 
   @Column()
+  userDisplayName: string;
+
+  @Column()
   userScore: number;
 }
