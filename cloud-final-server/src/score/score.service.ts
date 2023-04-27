@@ -114,57 +114,44 @@ export class ScoreService {
     // console.log(`Transcription: ${transcription}`);
     const client = new speech.SpeechClient();
     this.scoreLogger.log('client:', client);
+
+    // Instantiates a client.
+
+    // The path to the remote audio file.
     const gcsUri = 'gs://cloud-final-project-fung/Test_thai.wav';
 
-    // The audio file's encoding, sample rate in hertz, and BCP-47 language code
-    const audio = {
-      uri: gcsUri,
-    };
-    // const s3 = new S3();
-    // const params = { Bucket: 'line-data-cloud', Key: 'Test_thai.wav' };
-    // const response = await s3.getObject(params).promise(); // await the promise
-    // const fileContent = response.Body.toString('base64'); // can also do 'base64' here if desired
-    const config = {
-      encoding: 'LINEAR16',
-      sampleRateHertz: 48000,
-      languageCode: 'th-TH',
-      model: 'default',
-    };
+    // Transcribes your audio file using the specified configuration and prints the transcription.
+    async function transcribeSpeech() {
+      const audio = {
+        uri: gcsUri,
+      };
 
-    // const audioBytes = fs
-    //   .readFileSync('./src/score/Test_thai.wav')
-    //   .toString('base64');
-    // const audio = {
-    //   content: audioBytes,
-    // };
-    const request = {
-      audio: audio,
-      config: config,
-    };
-    // this.scoreLogger.log('request:', request);
-    // Detects speech in the audio file
-    // const x = await client
-    //   .recognize(request)
-    //   .then((response) => {
-    //     const transcription = response.results;
-    //     this.scoreLogger.log(
-    //       'Textual transcription: ',
-    //       JSON.stringify(response),
-    //     );
-    //   })
-    //   .catch((err) => {
-    //     this.scoreLogger.log('Transcription ERROR : ', err);
-    //   });
+      // The audio file's encoding, sample rate in hertz, BCP-47 language code and other settings.
+      const config = {
+        encoding: 'LINEAR16',
+        sampleRateHertz: 48000,
+        languageCode: 'th-TH',
+        model: 'default',
+        audioChannelCount: 1,
+        enableWordTimeOffsets: true,
+      };
+      const request = {
+        audio: audio,
+        config: config,
+      };
 
-    const response = await client.recognize(request);
-    this.scoreLogger.log('response:', response);
-    const transcription = response.results
-      .map((result) => result.alternatives[0].transcript)
-      .join('\n');
-    console.log(`Transcription: ${transcription}`);
-    this.scoreLogger.log('Transcription:', transcription);
-    return { score: `Transcription: ${transcription}` };
-    // return { score: '0' };
+      // Detects speech in the audio file. This creates a recognition job that you
+      // can wait for now, or get its result later.
+      const [operation] = await client.longRunningRecognize(request);
+      // Get a Promise representation of the final result of the job.
+      const [response] = await operation.promise();
+      const transcription = response.results
+        .map((result) => result.alternatives[0].transcript)
+        .join('\n');
+      this.scoreLogger.log(`Transcription: ${transcription}`);
+    }
+
+    return { score: '0' };
   }
 
   async getScoreBoard(audioNumber: string): Promise<Array<Score>> {
