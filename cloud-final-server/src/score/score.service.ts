@@ -27,9 +27,8 @@ export class ScoreService {
     @InjectRepository(ScoreBoard)
     private readonly scoreBoardRepository: Repository<ScoreBoard>,
     private readonly httpService: HttpService,
-    private readonly scoreLogger = new Logger('ScoreService'),
   ) {}
-
+  private readonly scoreLogger = new Logger('ScoreService');
   async getUserDisplayName(userId: string): Promise<string> {
     const res = await firstValueFrom(
       this.httpService.get(`https://api.line.me/v2/bot/profile/${userId}`, {
