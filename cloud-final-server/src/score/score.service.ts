@@ -112,7 +112,7 @@ export class ScoreService {
     const client = new speech.SpeechClient();
     this.scoreLogger.log('client:', client);
     const gcsUri =
-      'https://line-data-cloud.s3.us-east-2.amazonaws.com/test.m4a';
+      'https://line-data-cloud.s3.us-east-2.amazonaws.com/_test.wav';
 
     // The audio file's encoding, sample rate in hertz, and BCP-47 language code
     const audio = {
