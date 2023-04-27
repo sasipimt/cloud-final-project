@@ -109,7 +109,8 @@ export class ScoreService {
     //   .join('\n');
     // console.log(`Transcription: ${transcription}`);
     const client = new speech.SpeechClient();
-    const gcsUri = 'gs://cloud-samples-data/speech/brooklyn_bridge.raw';
+    const gcsUri =
+      'https://line-data-cloud.s3.us-east-2.amazonaws.com/test.m4a';
 
     // The audio file's encoding, sample rate in hertz, and BCP-47 language code
     const audio = {
