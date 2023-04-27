@@ -132,7 +132,7 @@ export class ScoreService {
       model: 'default',
     };
 
-    const audioBytes = fs.readFileSync('Test_thai.wav').toString('base64');
+    const audioBytes = fs.readFileSync('./Test_thai.wav').toString('base64');
     const audio = {
       content: audioBytes,
     };
