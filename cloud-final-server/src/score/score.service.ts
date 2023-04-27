@@ -69,6 +69,7 @@ export class ScoreService {
   }
 
   async getScore(scoreRequestDto: ScoreRequestDto): Promise<ScoreResponseDto> {
+    this.scoreLogger.log('getScore: start');
     // const lineClient = new line.Client({
     //   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
     // });
@@ -109,6 +110,7 @@ export class ScoreService {
     //   .join('\n');
     // console.log(`Transcription: ${transcription}`);
     const client = new speech.SpeechClient();
+    this.scoreLogger.log('client:', client);
     const gcsUri =
       'https://line-data-cloud.s3.us-east-2.amazonaws.com/test.m4a';
 
@@ -125,7 +127,7 @@ export class ScoreService {
       audio: audio,
       config: config,
     };
-
+    this.scoreLogger.log('request:', request);
     // Detects speech in the audio file
     const [response] = await client.recognize(request);
     this.scoreLogger.log('response:', response);
