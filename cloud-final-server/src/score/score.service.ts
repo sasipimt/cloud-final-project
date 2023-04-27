@@ -118,8 +118,7 @@ export class ScoreService {
     // Instantiates a client.
 
     // The path to the remote audio file.
-    const gcsUri =
-      'https://storage.googleapis.com/cloud-final-project-fung/Test_thai.wav';
+    const gcsUri = 'gs://cloud-final-project-fung/Test_thai.wav';
 
     // Transcribes your audio file using the specified configuration and prints the transcription.
     async function transcribeSpeech() {
