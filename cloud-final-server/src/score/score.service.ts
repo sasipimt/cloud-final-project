@@ -143,28 +143,28 @@ export class ScoreService {
     };
     // this.scoreLogger.log('request:', request);
     // Detects speech in the audio file
-    const x = await client
-      .recognize(request)
-      .then((response) => {
-        const transcription = response.results;
-        this.scoreLogger.log(
-          'Textual transcription: ',
-          JSON.stringify(response),
-        );
-      })
-      .catch((err) => {
-        this.scoreLogger.log('Transcription ERROR : ', err);
-      });
+    // const x = await client
+    //   .recognize(request)
+    //   .then((response) => {
+    //     const transcription = response.results;
+    //     this.scoreLogger.log(
+    //       'Textual transcription: ',
+    //       JSON.stringify(response),
+    //     );
+    //   })
+    //   .catch((err) => {
+    //     this.scoreLogger.log('Transcription ERROR : ', err);
+    //   });
 
-    // const response = await client.recognize(request);
-    // this.scoreLogger.log('response:', response);
-    // const transcription = response.results
-    //   .map((result) => result.alternatives[0].transcript)
-    //   .join('\n');
-    // console.log(`Transcription: ${transcription}`);
-    // this.scoreLogger.log('Transcription:', transcription);
-    // return { score: `Transcription: ${transcription}` };
-    return { score: '0' };
+    const response = await client.recognize(request);
+    this.scoreLogger.log('response:', response);
+    const transcription = response.results
+      .map((result) => result.alternatives[0].transcript)
+      .join('\n');
+    console.log(`Transcription: ${transcription}`);
+    this.scoreLogger.log('Transcription:', transcription);
+    return { score: `Transcription: ${transcription}` };
+    // return { score: '0' };
   }
 
   async getScoreBoard(audioNumber: string): Promise<Array<Score>> {
