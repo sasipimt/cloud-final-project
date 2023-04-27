@@ -132,7 +132,7 @@ export class ScoreService {
     };
 
     const audioBytes = fs
-      .readFileSync('../../testFile/Test_thai.wav')
+      .readFileSync('./../../testFile/Test_thai.wav')
       .toString('base64');
     const audio = {
       content: audioBytes,
