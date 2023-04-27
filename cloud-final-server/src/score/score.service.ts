@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RequestHistory } from '../schema/requestHistory.entity';
 import { Score } from '../schema/score.entity';
@@ -27,6 +27,7 @@ export class ScoreService {
     @InjectRepository(ScoreBoard)
     private readonly scoreBoardRepository: Repository<ScoreBoard>,
     private readonly httpService: HttpService,
+    private readonly scoreLogger = new Logger('ScoreService'),
   ) {}
 
   async getUserDisplayName(userId: string): Promise<string> {
@@ -127,10 +128,12 @@ export class ScoreService {
 
     // Detects speech in the audio file
     const [response] = await client.recognize(request);
+    this.scoreLogger.log('response:', response);
     const transcription = response.results
       .map((result) => result.alternatives[0].transcript)
       .join('\n');
     console.log(`Transcription: ${transcription}`);
+    this.scoreLogger.log('Transcription:', transcription);
     return { score: `Transcription: ${transcription}` };
     // return { score: '0' };
   }
