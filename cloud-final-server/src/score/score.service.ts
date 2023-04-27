@@ -144,7 +144,7 @@ export class ScoreService {
     };
     // this.scoreLogger.log('request:', request);
     // Detects speech in the audio file
-    client
+    const x = await client
       .longRunningRecognize(request)
       .then((response) => {
         const transcription = response.results(10000);
