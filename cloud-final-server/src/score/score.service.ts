@@ -133,7 +133,7 @@ export class ScoreService {
       audio: audio,
       config: config,
     };
-    this.scoreLogger.log('request:', request);
+    // this.scoreLogger.log('request:', request);
     // Detects speech in the audio file
     try {
       const [response] = await client.recognize(request);
