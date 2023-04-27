@@ -119,7 +119,7 @@ export class ScoreService {
     //   uri: gcsUri,
     // };
     const config = {
-      encoding: 'LINEAR16',
+      encoding: 'WAV',
       sampleRateHertz: 48000,
       languageCode: 'th-TH',
       model: 'default',
