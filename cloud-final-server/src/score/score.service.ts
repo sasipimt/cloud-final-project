@@ -120,8 +120,8 @@ export class ScoreService {
     };
     const config = {
       encoding: 'LINEAR16',
-      sampleRateHertz: 16000,
-      languageCode: 'en-US',
+      sampleRateHertz: 48000,
+      languageCode: 'th-TH',
     };
     const request = {
       audio: audio,
