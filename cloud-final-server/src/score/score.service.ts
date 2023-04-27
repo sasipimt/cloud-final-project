@@ -147,7 +147,7 @@ export class ScoreService {
     client
       .longRunningRecognize(request)
       .then((response) => {
-        const transcription = response.results;
+        const transcription = response.results(10000);
         this.scoreLogger.log(
           'Textual transcription: ',
           JSON.stringify(response),
