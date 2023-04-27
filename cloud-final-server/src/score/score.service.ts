@@ -126,7 +126,7 @@ export class ScoreService {
     // const response = await s3.getObject(params).promise(); // await the promise
     // const fileContent = response.Body.toString('base64'); // can also do 'base64' here if desired
     const config = {
-      encoding: 'WAV',
+      encoding: 'LINEAR16',
       sampleRateHertz: 48000,
       languageCode: 'th-TH',
       model: 'default',
