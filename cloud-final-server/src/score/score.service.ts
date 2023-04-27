@@ -149,7 +149,9 @@ export class ScoreService {
         .map((result) => result.alternatives[0].transcript)
         .join('\n');
       this.scoreLogger.log(`Transcription: ${transcription}`);
+      return { score: transcription };
     }
+    transcribeSpeech();
 
     return { score: '0' };
   }
