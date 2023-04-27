@@ -12,10 +12,11 @@ import { AxiosResponse, AxiosRequestConfig } from 'axios';
 import { config } from 'process';
 import { AudioResponseDto } from 'src/dto/audioResponse.dto';
 import { ScoreResponseDto } from 'src/dto/scoreResponse.dto';
-import { S3 } from 'aws-sdk';
+// import { S3 } from 'aws-sdk';
 
 const speech = require('@google-cloud/speech');
 const line = require('@line/bot-sdk');
+const fs = require('fs');
 require('dotenv').config();
 
 @Injectable()
@@ -119,10 +120,10 @@ export class ScoreService {
     // const audio = {
     //   uri: gcsUri,
     // };
-    const s3 = new S3();
-    const params = { Bucket: 'line-data-cloud', Key: 'Test_thai.wav' };
-    const response = await s3.getObject(params).promise(); // await the promise
-    const fileContent = response.Body.toString('base64'); // can also do 'base64' here if desired
+    // const s3 = new S3();
+    // const params = { Bucket: 'line-data-cloud', Key: 'Test_thai.wav' };
+    // const response = await s3.getObject(params).promise(); // await the promise
+    // const fileContent = response.Body.toString('base64'); // can also do 'base64' here if desired
     const config = {
       encoding: 'WAV',
       sampleRateHertz: 48000,
@@ -130,8 +131,11 @@ export class ScoreService {
       model: 'default',
     };
 
+    const audioBytes = fs
+      .readFileSync('../../testFile/Test_thai.wav')
+      .toString('base64');
     const audio = {
-      content: fileContent,
+      content: audioBytes,
     };
     const request = {
       audio: audio,
