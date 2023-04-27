@@ -17,6 +17,7 @@ import { ScoreResponseDto } from 'src/dto/scoreResponse.dto';
 const speech = require('@google-cloud/speech');
 const line = require('@line/bot-sdk');
 const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 @Injectable()
@@ -131,9 +132,7 @@ export class ScoreService {
       model: 'default',
     };
 
-    const audioBytes = fs
-      .readFileSync('./../../testFile/Test_thai.wav')
-      .toString('base64');
+    const audioBytes = fs.readFileSync('Test_thai.wav').toString('base64');
     const audio = {
       content: audioBytes,
     };
