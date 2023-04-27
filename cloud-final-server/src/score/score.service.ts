@@ -112,7 +112,7 @@ export class ScoreService {
     const client = new speech.SpeechClient();
     this.scoreLogger.log('client:', client);
     const gcsUri =
-      'https://line-data-cloud.s3.us-east-2.amazonaws.com/_test.wav';
+      'https://line-data-cloud.s3.us-east-2.amazonaws.com/Test_thai.wav';
 
     // The audio file's encoding, sample rate in hertz, and BCP-47 language code
     const audio = {
@@ -120,8 +120,9 @@ export class ScoreService {
     };
     const config = {
       encoding: 'LINEAR16',
-      sampleRateHertz: 48000,
+      // sampleRateHertz: 48000,
       languageCode: 'th-TH',
+      model: 'default',
     };
     const request = {
       audio: audio,
@@ -129,15 +130,19 @@ export class ScoreService {
     };
     this.scoreLogger.log('request:', request);
     // Detects speech in the audio file
-    const [response] = await client.recognize(request);
-    this.scoreLogger.log('response:', response);
-    const transcription = response.results
-      .map((result) => result.alternatives[0].transcript)
-      .join('\n');
-    console.log(`Transcription: ${transcription}`);
-    this.scoreLogger.log('Transcription:', transcription);
-    return { score: `Transcription: ${transcription}` };
-    // return { score: '0' };
+    try {
+      const [response] = await client.recognize(request);
+      this.scoreLogger.log('response:', response);
+      const transcription = response.results
+        .map((result) => result.alternatives[0].transcript)
+        .join('\n');
+      console.log(`Transcription: ${transcription}`);
+      this.scoreLogger.log('Transcription:', transcription);
+      return { score: `Transcription: ${transcription}` };
+    } catch (err) {
+      this.scoreLogger.log('err: ', err);
+    }
+    return { score: '0' };
   }
 
   async getScoreBoard(audioNumber: string): Promise<Array<Score>> {
