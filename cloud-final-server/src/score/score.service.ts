@@ -114,13 +114,12 @@ export class ScoreService {
     // console.log(`Transcription: ${transcription}`);
     const client = new speech.SpeechClient();
     this.scoreLogger.log('client:', client);
-    const gcsUri =
-      'https://line-data-cloud.s3.us-east-2.amazonaws.com/Test_thai.wav';
+    const gcsUri = 'gs://cloud-final-project-fung/Test_thai.wav';
 
     // The audio file's encoding, sample rate in hertz, and BCP-47 language code
-    // const audio = {
-    //   uri: gcsUri,
-    // };
+    const audio = {
+      uri: gcsUri,
+    };
     // const s3 = new S3();
     // const params = { Bucket: 'line-data-cloud', Key: 'Test_thai.wav' };
     // const response = await s3.getObject(params).promise(); // await the promise
@@ -132,12 +131,12 @@ export class ScoreService {
       model: 'default',
     };
 
-    const audioBytes = fs
-      .readFileSync('./src/score/Test_thai.wav')
-      .toString('base64');
-    const audio = {
-      content: audioBytes,
-    };
+    // const audioBytes = fs
+    //   .readFileSync('./src/score/Test_thai.wav')
+    //   .toString('base64');
+    // const audio = {
+    //   content: audioBytes,
+    // };
     const request = {
       audio: audio,
       config: config,
