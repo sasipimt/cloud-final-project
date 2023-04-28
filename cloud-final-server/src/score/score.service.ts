@@ -170,6 +170,7 @@ export class ScoreService {
               },
             ).then((res) => {
               if (res === 'done!') {
+                while (this.getFilesizeInBytes(`${fileName}.wav`) === 0) {}
                 s3Put();
               }
             });
@@ -246,5 +247,11 @@ export class ScoreService {
       // finish();
       return resolve('done!');
     });
+  }
+
+  getFilesizeInBytes(filename) {
+    var stats = fs.statSync(filename);
+    var fileSizeInBytes = stats.size;
+    return fileSizeInBytes;
   }
 }
