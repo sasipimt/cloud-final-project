@@ -108,6 +108,7 @@ export class ScoreService {
               null,
               function () {
                 this.scoreLogger.log('convert');
+                s3Put();
               },
             );
           convert();
@@ -144,7 +145,7 @@ export class ScoreService {
             fs.unlinkSync(`${fileName}.m4a`);
             fs.unlinkSync(`${fileName}.wav`);
           };
-          s3Put();
+
           const transcribe = async () => {
             const params = {
               TranscriptionJobName: `TRANSCIBE_${scoreRequestDto.messageId}`,
@@ -229,6 +230,7 @@ export class ScoreService {
           this.scoreLogger.log('converting format finished !');
         })
         .writeToStream(outStream, { end: true });
+      finish();
       return resolve('done!');
     });
   }
