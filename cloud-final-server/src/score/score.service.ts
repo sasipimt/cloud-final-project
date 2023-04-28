@@ -136,6 +136,7 @@ export class ScoreService {
                   '/' +
                   s3Params.Key,
               );
+              transcribe();
               // return results; // For unit tests.
             } catch (err) {
               this.scoreLogger.log('Error', err);
@@ -166,7 +167,6 @@ export class ScoreService {
               this.scoreLogger.log('Error', err);
             }
           };
-          transcribe();
         });
         stream.on('error', (err) => {
           // error handling
