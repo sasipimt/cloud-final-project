@@ -107,7 +107,7 @@ export class ScoreService {
               function (errorMessage) {},
               null,
               function () {
-                this.scoreLogger.log('convert');
+                // this.scoreLogger.log('convert');
                 s3Put();
               },
             );
