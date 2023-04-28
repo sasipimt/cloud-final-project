@@ -107,18 +107,18 @@ export class ScoreService {
         function (errorMessage) {},
         null,
         function () {},
-      ).then((res) => {
-        this.scoreLogger.log('res done', res);
-        if (res === 'done!') {
-          let size = fs.statSync(`${fileName}.wav`).size;
-          this.scoreLogger.log('res size', size);
-          while (size === 0) {
-            size = fs.statSync(`${fileName}.wav`).size;
-          }
-          this.scoreLogger.log('res size after while', size);
-          this.s3Put(fileName);
-        }
-      });
+      );
+      // ).then((res) => {
+      //   this.scoreLogger.log('res done', res);
+      //   if (res === 'done!') {
+      //     let size = fs.statSync(`${fileName}.wav`).size;
+      //     this.scoreLogger.log('res size', size);
+      //     while (size === 0) {
+      //       size = fs.statSync(`${fileName}.wav`).size;
+      //     }
+      //     this.scoreLogger.log('res size after while', size);
+      //   }
+      // });
     });
 
     await stream.on('error', (err) => {
