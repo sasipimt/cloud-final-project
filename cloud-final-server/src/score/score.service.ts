@@ -124,7 +124,7 @@ export class ScoreService {
     //   this.scoreLogger.log('err2: ', err);
     // });
     const x = await this.convertFileFormat(
-      `${fileName}.m4a`,
+      `${fileName}`,
       `${fileName}.wav`,
       function (errorMessage) {},
       null,
@@ -171,7 +171,7 @@ export class ScoreService {
     finish,
   ): Promise<string> {
     return new Promise((resolve, reject) => {
-      const inStream = fs.createReadStream(file);
+      const inStream = fs.createReadStream(`${file}.m4a`);
       const outStream = fs.createWriteStream(destination);
       const x = new ffmpeg({ source: inStream })
         .toFormat('wav')
