@@ -97,15 +97,17 @@ export class ScoreService {
           // this.scoreLogger.log('audioBytes: ', audioBytes);
           // const buffer = Buffer.from(audioBytes, 'base64');
           fs.writeFileSync(`${fileName}.m4a`, chunk);
-          this.convertFileFormat(
-            `${fileName}.m4a`,
-            `${fileName}.wav`,
-            function (errorMessage) {},
-            null,
-            function () {
-              console.log('success');
-            },
-          );
+          const convert = async () =>
+            await this.convertFileFormat(
+              `${fileName}.m4a`,
+              `${fileName}.wav`,
+              function (errorMessage) {},
+              null,
+              function () {
+                this.scoreLogger.log('convert');
+              },
+            );
+          convert();
 
           // this.scoreLogger.log(
           //   `wrote ${buffer.byteLength.toLocaleString()} bytes to file.`,
@@ -204,26 +206,32 @@ export class ScoreService {
   }
 
   convertFileFormat(file, destination, error, progressing, finish) {
-    ffmpeg(file)
-      .on('error', (err) => {
-        console.log('An error occurred: ' + err.message);
-        if (error) {
-          error(err.message);
-        }
-      })
-      .on('progress', (progress) => {
-        // console.log(JSON.stringify(progress));
-        console.log('Processing: ' + progress.targetSize + ' KB converted');
-        if (progressing) {
-          progressing(progress.targetSize);
-        }
-      })
-      .on('end', () => {
-        console.log('converting format finished !');
-        if (finish) {
-          finish();
-        }
-      })
-      .save(destination);
+    return new Promise((resolve, reject) => {
+      ffmpeg(file)
+        .on('error', (err) => {
+          this.scoreLogger.log('An error occurred: ' + err.message);
+          if (error) {
+            error(err.message);
+            return reject(new Error(err));
+          }
+        })
+        .on('progress', (progress) => {
+          // console.log(JSON.stringify(progress));
+          this.scoreLogger.log(
+            'Processing: ' + progress.targetSize + ' KB converted',
+          );
+          if (progressing) {
+            progressing(progress.targetSize);
+          }
+        })
+        .on('end', () => {
+          this.scoreLogger.log('converting format finished !');
+          if (finish) {
+            finish();
+          }
+        })
+        .save(destination);
+      resolve('');
+    });
   }
 }
