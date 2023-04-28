@@ -131,7 +131,7 @@ export class ScoreService {
             const params = {
               TranscriptionJobName: `TRANSCIBE_${scoreRequestDto.messageId}`,
               LanguageCode: 'th-TH', // For example, 'en-US'
-              MediaFormat: 'wav', // For example, 'wav'
+              MediaFormat: 'm4a', // For example, 'wav'
               Media: {
                 MediaFileUri: `https://line-data-cloud.s3.us-east-2.amazonaws.com/${fileName}`,
                 // For example, "https://transcribe-demo.s3-REGION.amazonaws.com/hello_world.wav"
