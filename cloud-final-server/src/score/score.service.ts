@@ -98,17 +98,8 @@ export class ScoreService {
       fs.writeFileSync(`${fileName}.wav`, 'a');
     });
 
-    let x;
-    await stream.on('end', async (scoreRequestDto: ScoreRequestDto) => {
+    await stream.on('end', async () => {
       this.scoreLogger.log('There will be no more data.');
-
-      x = await this.convertFileFormat(
-        `${fileName}.m4a`,
-        `${fileName}.wav`,
-        function (errorMessage) {},
-        null,
-        function () {},
-      );
 
       // ).then((res) => {
       //   this.scoreLogger.log('res done', res);
@@ -132,6 +123,14 @@ export class ScoreService {
     // .catch((err) => {
     //   this.scoreLogger.log('err2: ', err);
     // });
+    const x = await this.convertFileFormat(
+      `${fileName}.m4a`,
+      `${fileName}.wav`,
+      function (errorMessage) {},
+      null,
+      function () {},
+    );
+
     const name = await this.s3Put(x);
     return await this.transcribe(scoreRequestDto, name);
   }
