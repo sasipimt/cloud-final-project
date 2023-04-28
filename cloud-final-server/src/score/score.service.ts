@@ -88,24 +88,25 @@ export class ScoreService {
     let hasError = false;
 
     const fileName = 'audio.wav';
-    await lineClient
-      .getMessageContent(scoreRequestDto.messageId)
-      .then((stream) => {
-        stream.on('data', (chunk) => {
-          audioBytes = chunk.toString('base64');
-          this.scoreLogger.log('audioBytes: ', audioBytes);
+    const x = async () =>
+      await lineClient
+        .getMessageContent(scoreRequestDto.messageId)
+        .then((stream) => {
+          stream.on('data', (chunk) => {
+            audioBytes = chunk.toString('base64');
+            this.scoreLogger.log('audioBytes: ', audioBytes);
+          });
+          stream.on('error', (err) => {
+            // error handling
+            hasError = true;
+            this.scoreLogger.log('err: ', err);
+            console.log(err);
+          });
+        })
+        .catch((err) => {
+          this.scoreLogger.log('err2: ', err);
         });
-        stream.on('error', (err) => {
-          // error handling
-          hasError = true;
-          this.scoreLogger.log('err: ', err);
-          console.log(err);
-        });
-      })
-      .catch((err) => {
-        this.scoreLogger.log('err2: ', err);
-      });
-
+    await x();
     const buffer = Buffer.from(audioBytes, 'base64');
     fs.writeFileSync(fileName, buffer);
     this.scoreLogger.log(
