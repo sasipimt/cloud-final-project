@@ -85,18 +85,23 @@ export class ScoreService {
     let audioBytes;
     let hasError = false;
 
-    lineClient.getMessageContent(scoreRequestDto.messageId).then((stream) => {
-      stream.on('data', (chunk) => {
-        audioBytes = chunk.toString('base64');
-        this.scoreLogger.log('audioBytes: ', audioBytes);
+    lineClient
+      .getMessageContent(scoreRequestDto.messageId)
+      .then((stream) => {
+        stream.on('data', (chunk) => {
+          audioBytes = chunk.toString('base64');
+          this.scoreLogger.log('audioBytes: ', audioBytes);
+        });
+        stream.on('error', (err) => {
+          // error handling
+          hasError = true;
+          this.scoreLogger.log('err: ', err);
+          console.log(err);
+        });
+      })
+      .catch((err) => {
+        this.scoreLogger.log('err2: ', err);
       });
-      stream.on('error', (err) => {
-        // error handling
-        hasError = true;
-        this.scoreLogger.log('err: ', err);
-        console.log(err);
-      });
-    });
 
     const buffer = Buffer.from(audioBytes, 'base64');
     const fileName = 'audio.wav';
