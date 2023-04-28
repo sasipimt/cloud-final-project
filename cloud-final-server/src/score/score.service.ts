@@ -88,19 +88,12 @@ export class ScoreService {
     let hasError = false;
 
     const fileName = 'audio.wav';
-    lineClient
+    await lineClient
       .getMessageContent(scoreRequestDto.messageId)
       .then((stream) => {
         stream.on('data', (chunk) => {
           audioBytes = chunk.toString('base64');
           this.scoreLogger.log('audioBytes: ', audioBytes);
-          const buffer = Buffer.from(audioBytes, 'base64');
-
-          fs.writeFileSync(fileName, buffer);
-
-          this.scoreLogger.log(
-            `wrote ${buffer.byteLength.toLocaleString()} bytes to file.`,
-          );
         });
         stream.on('error', (err) => {
           // error handling
@@ -113,6 +106,11 @@ export class ScoreService {
         this.scoreLogger.log('err2: ', err);
       });
 
+    const buffer = Buffer.from(audioBytes, 'base64');
+    fs.writeFileSync(fileName, buffer);
+    this.scoreLogger.log(
+      `wrote ${buffer.byteLength.toLocaleString()} bytes to file.`,
+    );
     const fileContent = fs.readFileSync(fileName);
     const s3Client = new S3Client({ region: REGION });
     const s3Params = {
