@@ -31,7 +31,7 @@ const params = {
       'https://line-data-cloud.s3.us-east-2.amazonaws.com/Test_thai.wav',
     // For example, "https://transcribe-demo.s3-REGION.amazonaws.com/hello_world.wav"
   },
-  OutputBucketName: 'line-data-cloud/transcribe/',
+  OutputBucketName: 'line-data-cloud',
 };
 
 @Injectable()
