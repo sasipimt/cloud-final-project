@@ -87,12 +87,20 @@ export class ScoreService {
     let audioBytes;
     let hasError = false;
 
+    const fileName = 'audio.wav';
     lineClient
       .getMessageContent(scoreRequestDto.messageId)
       .then((stream) => {
         stream.on('data', (chunk) => {
           audioBytes = chunk.toString('base64');
           this.scoreLogger.log('audioBytes: ', audioBytes);
+          const buffer = Buffer.from(audioBytes, 'base64');
+
+          fs.writeFileSync(fileName, buffer);
+
+          this.scoreLogger.log(
+            `wrote ${buffer.byteLength.toLocaleString()} bytes to file.`,
+          );
         });
         stream.on('error', (err) => {
           // error handling
@@ -105,14 +113,7 @@ export class ScoreService {
         this.scoreLogger.log('err2: ', err);
       });
 
-    const buffer = Buffer.from(audioBytes, 'base64');
-    const fileName = 'audio.wav';
-    fs.writeFileSync(fileName, buffer);
     const fileContent = fs.readFileSync(fileName);
-    this.scoreLogger.log(
-      `wrote ${buffer.byteLength.toLocaleString()} bytes to file.`,
-    );
-
     const s3Client = new S3Client({ region: REGION });
     const s3Params = {
       Bucket: 'line-data-cloud', // The name of the bucket. For example, 'sample-bucket-101'.
