@@ -86,19 +86,19 @@ export class ScoreService {
     });
     let audioBytes;
 
-    const fileName = 'audio.wav';
+    const fileName = 'audio.m4a';
     lineClient
       .getMessageContent(scoreRequestDto.messageId)
       .then((stream) => {
         stream.on('data', (chunk) => {
           this.scoreLogger.log('chunk: ', chunk);
-          audioBytes = chunk.toString('base64');
-          this.scoreLogger.log('audioBytes: ', audioBytes);
-          const buffer = Buffer.from(audioBytes, 'base64');
-          fs.writeFileSync(fileName, buffer);
-          this.scoreLogger.log(
-            `wrote ${buffer.byteLength.toLocaleString()} bytes to file.`,
-          );
+          // audioBytes = chunk.toString('base64');
+          // this.scoreLogger.log('audioBytes: ', audioBytes);
+          // const buffer = Buffer.from(audioBytes, 'base64');
+          fs.writeFileSync(fileName, chunk);
+          // this.scoreLogger.log(
+          //   `wrote ${buffer.byteLength.toLocaleString()} bytes to file.`,
+          // );
           const fileContent = fs.readFileSync(fileName);
           const s3Client = new S3Client({ region: REGION });
           const s3Params = {
