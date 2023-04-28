@@ -21,6 +21,7 @@ const speech = require('@google-cloud/speech');
 const line = require('@line/bot-sdk');
 const fs = require('fs');
 const path = require('path');
+const ffmpeg = require('fluent-ffmpeg');
 const { TranscribeClient } = require('@aws-sdk/client-transcribe');
 require('dotenv').config();
 const REGION = 'us-east-2';
@@ -86,7 +87,7 @@ export class ScoreService {
     });
     let audioBytes;
 
-    const fileName = 'audio.m4a';
+    const fileName = 'audio';
     lineClient
       .getMessageContent(scoreRequestDto.messageId)
       .then((stream) => {
@@ -95,15 +96,25 @@ export class ScoreService {
           // audioBytes = chunk.toString('base64');
           // this.scoreLogger.log('audioBytes: ', audioBytes);
           // const buffer = Buffer.from(audioBytes, 'base64');
-          fs.writeFileSync(fileName, chunk);
+          fs.writeFileSync(`${fileName}.m4a`, chunk);
+          this.convertFileFormat(
+            `${fileName}.m4a`,
+            `${fileName}.wav`,
+            function (errorMessage) {},
+            null,
+            function () {
+              console.log('success');
+            },
+          );
+
           // this.scoreLogger.log(
           //   `wrote ${buffer.byteLength.toLocaleString()} bytes to file.`,
           // );
-          const fileContent = fs.readFileSync(fileName);
+          const fileContent = fs.readFileSync(`${fileName}.wav`);
           const s3Client = new S3Client({ region: REGION });
           const s3Params = {
             Bucket: 'line-data-cloud', // The name of the bucket. For example, 'sample-bucket-101'.
-            Key: fileName, // The name of the object. For example, 'sample_upload.txt'.
+            Key: `${fileName}.wav`, // The name of the object. For example, 'sample_upload.txt'.
             Body: fileContent, // The content of the object. For example, 'Hello world!".
           };
 
@@ -131,9 +142,9 @@ export class ScoreService {
             const params = {
               TranscriptionJobName: `TRANSCIBE_${scoreRequestDto.messageId}`,
               LanguageCode: 'th-TH', // For example, 'en-US'
-              MediaFormat: 'm4a', // For example, 'wav'
+              MediaFormat: 'wav', // For example, 'wav'
               Media: {
-                MediaFileUri: `https://line-data-cloud.s3.us-east-2.amazonaws.com/${fileName}`,
+                MediaFileUri: `https://line-data-cloud.s3.us-east-2.amazonaws.com/${fileName}.wav`,
                 // For example, "https://transcribe-demo.s3-REGION.amazonaws.com/hello_world.wav"
               },
               OutputBucketName: 'line-data-cloud',
@@ -190,5 +201,29 @@ export class ScoreService {
       }
     }
     return scoreBoard;
+  }
+
+  convertFileFormat(file, destination, error, progressing, finish) {
+    ffmpeg(file)
+      .on('error', (err) => {
+        console.log('An error occurred: ' + err.message);
+        if (error) {
+          error(err.message);
+        }
+      })
+      .on('progress', (progress) => {
+        // console.log(JSON.stringify(progress));
+        console.log('Processing: ' + progress.targetSize + ' KB converted');
+        if (progressing) {
+          progressing(progress.targetSize);
+        }
+      })
+      .on('end', () => {
+        console.log('converting format finished !');
+        if (finish) {
+          finish();
+        }
+      })
+      .save(destination);
   }
 }
