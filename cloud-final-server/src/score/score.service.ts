@@ -158,7 +158,7 @@ export class ScoreService {
             }
           };
 
-          const convert = async () =>
+          const convert = async () => {
             await this.convertFileFormat(
               `${fileName}.m4a`,
               `${fileName}.wav`,
@@ -169,6 +169,7 @@ export class ScoreService {
                 s3Put();
               },
             );
+          };
           convert();
         });
         stream.on('error', (err) => {
