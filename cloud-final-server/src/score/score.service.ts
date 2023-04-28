@@ -12,13 +12,27 @@ import { AxiosResponse, AxiosRequestConfig } from 'axios';
 import { config } from 'process';
 import { AudioResponseDto } from 'src/dto/audioResponse.dto';
 import { ScoreResponseDto } from 'src/dto/scoreResponse.dto';
+import { StartTranscriptionJobCommand } from '@aws-sdk/client-transcribe';
 // import { S3 } from 'aws-sdk';
 
 const speech = require('@google-cloud/speech');
 const line = require('@line/bot-sdk');
 const fs = require('fs');
 const path = require('path');
+const { TranscribeClient } = require('@aws-sdk/client-transcribe');
 require('dotenv').config();
+const REGION = 'us-east-2';
+const params = {
+  TranscriptionJobName: 'TEST_TRANSCIBE',
+  LanguageCode: 'th-TH', // For example, 'en-US'
+  MediaFormat: 'wav', // For example, 'wav'
+  Media: {
+    MediaFileUri:
+      'https://line-data-cloud.s3.us-east-2.amazonaws.com/Test_thai.wav',
+    // For example, "https://transcribe-demo.s3-REGION.amazonaws.com/hello_world.wav"
+  },
+  OutputBucketName: 'line-data-cloud/transcribe/',
+};
 
 @Injectable()
 export class ScoreService {
@@ -95,63 +109,16 @@ export class ScoreService {
     //   const audio = {
     //     content: audioBytes,
     //   };
-
-    // const config = {
-    //   encoding: 'LINEAR16',
-    //   sampleRateHertz: 24000,
-    //   languageCode: 'en-US',
-    // };
-
-    // const request = {
-    //   audio,
-    //   config,
-    // };
-
-    // const [response] = await client.recognize(request);
-    // const transcription = response.results
-    //   .map((result) => result.alternatives[0].transcript)
-    //   .join('\n');
-    // console.log(`Transcription: ${transcription}`);
-    const client = new speech.SpeechClient();
-    this.scoreLogger.log('client:', client);
-
-    // Instantiates a client.
-
-    // The path to the remote audio file.
-    const gcsUri = 'gs://cloud-final-project-fung/Test_thai.wav';
-
-    // Transcribes your audio file using the specified configuration and prints the transcription.
-    async function transcribeSpeech() {
-      const audio = {
-        uri: gcsUri,
-      };
-
-      // The audio file's encoding, sample rate in hertz, BCP-47 language code and other settings.
-      const config = {
-        encoding: 'LINEAR16',
-        sampleRateHertz: 48000,
-        languageCode: 'th-TH',
-        model: 'default',
-        audioChannelCount: 1,
-        enableWordTimeOffsets: true,
-      };
-      const request = {
-        audio: audio,
-        config: config,
-      };
-
-      // Detects speech in the audio file. This creates a recognition job that you
-      // can wait for now, or get its result later.
-      const [operation] = await client.longRunningRecognize(request);
-      // Get a Promise representation of the final result of the job.
-      const [response] = await operation.promise();
-      const transcription = response.results
-        .map((result) => result.alternatives[0].transcript)
-        .join('\n');
-      this.scoreLogger.log(`Transcription: ${transcription}`);
-      return { score: transcription };
+    const transcribeClient = new TranscribeClient({ region: REGION });
+    try {
+      const data = await transcribeClient.send(
+        new StartTranscriptionJobCommand(params),
+      );
+      this.scoreLogger.log('Success - put', data);
+      return { score: data }; // For unit tests.
+    } catch (err) {
+      this.scoreLogger.log('Error', err);
     }
-    transcribeSpeech();
 
     return { score: '0' };
   }
