@@ -91,6 +91,7 @@ export class ScoreService {
       .getMessageContent(scoreRequestDto.messageId)
       .then((stream) => {
         stream.on('data', (chunk) => {
+          this.scoreLogger.log('chunk: ', chunk);
           audioBytes = chunk.toString('base64');
           this.scoreLogger.log('audioBytes: ', audioBytes);
           const buffer = Buffer.from(audioBytes, 'base64');
@@ -128,7 +129,7 @@ export class ScoreService {
           s3Put();
           const transcribe = async () => {
             const params = {
-              TranscriptionJobName: `TRANSCIBE_${fileName}_${scoreRequestDto.messageId}`,
+              TranscriptionJobName: `TRANSCIBE_${scoreRequestDto.messageId}`,
               LanguageCode: 'th-TH', // For example, 'en-US'
               MediaFormat: 'wav', // For example, 'wav'
               Media: {
