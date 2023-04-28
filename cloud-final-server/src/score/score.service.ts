@@ -96,6 +96,7 @@ export class ScoreService {
       });
     });
 
+    this.scoreLogger.log('audioBytes: ', audioBytes);
     const buffer = Buffer.from(audioBytes, 'base64');
     const fileName = 'audio.wav';
     fs.writeFileSync(fileName, buffer);
