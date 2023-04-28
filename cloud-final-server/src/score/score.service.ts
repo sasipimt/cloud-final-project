@@ -106,7 +106,7 @@ export class ScoreService {
         .catch((err) => {
           this.scoreLogger.log('err2: ', err);
         });
-    await x();
+    const y = await x();
     const buffer = Buffer.from(audioBytes, 'base64');
     fs.writeFileSync(fileName, buffer);
     this.scoreLogger.log(
