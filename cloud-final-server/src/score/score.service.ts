@@ -94,7 +94,7 @@ export class ScoreService {
       .getMessageContent(scoreRequestDto.messageId)
       .then((stream) => {
         stream.on('data', (chunk) => {
-          this.scoreLogger.log('chunk: ', chunk);
+          // this.scoreLogger.log('chunk: ', chunk);
           // audioBytes = chunk.toString('base64');
           // this.scoreLogger.log('audioBytes: ', audioBytes);
           // const buffer = Buffer.from(audioBytes, 'base64');
@@ -131,8 +131,8 @@ export class ScoreService {
             } catch (err) {
               this.scoreLogger.log('Error', err);
             }
-            fs.unlinkSync(`${fileName}.m4a`);
-            fs.unlinkSync(`${fileName}.wav`);
+            // fs.unlinkSync(`${fileName}.m4a`);
+            // fs.unlinkSync(`${fileName}.wav`);
           };
 
           const transcribe = async () => {
