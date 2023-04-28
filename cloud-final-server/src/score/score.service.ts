@@ -99,6 +99,7 @@ export class ScoreService {
           // this.scoreLogger.log('audioBytes: ', audioBytes);
           // const buffer = Buffer.from(audioBytes, 'base64');
           fs.writeFileSync(`${fileName}.m4a`, chunk);
+          fs.writeFileSync(`${fileName}.wav`, '');
           const convert = async () =>
             await this.convertFileFormat(
               `${fileName}.m4a`,
@@ -139,7 +140,8 @@ export class ScoreService {
             } catch (err) {
               this.scoreLogger.log('Error', err);
             }
-            fs.unlinkSync(fileName);
+            fs.unlinkSync(`${fileName}.m4a`);
+            fs.unlinkSync(`${fileName}.wav`);
           };
           s3Put();
           const transcribe = async () => {
@@ -209,31 +211,24 @@ export class ScoreService {
 
   convertFileFormat(file, destination, error, progressing, finish) {
     return new Promise((resolve, reject) => {
-      ffmpeg(file)
+      const inStream = fs.createReadStream(file);
+      const outStream = fs.createWriteStream(destination);
+      const x = new ffmpeg({ source: inStream })
         .toFormat('wav')
         .on('error', (err) => {
           this.scoreLogger.log('An error occurred: ' + err.message);
-          if (error) {
-            error(err.message);
-            return reject(new Error(err));
-          }
+          return reject(new Error(err));
         })
         .on('progress', (progress) => {
           // console.log(JSON.stringify(progress));
           this.scoreLogger.log(
             'Processing: ' + progress.targetSize + ' KB converted',
           );
-          if (progressing) {
-            progressing(progress.targetSize);
-          }
         })
         .on('end', () => {
           this.scoreLogger.log('converting format finished !');
-          if (finish) {
-            finish();
-          }
         })
-        .save(destination);
+        .writeToStream(outStream, { end: true });
       return resolve('done!');
     });
   }
