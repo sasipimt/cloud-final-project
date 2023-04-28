@@ -100,31 +100,19 @@ export class ScoreService {
           // const buffer = Buffer.from(audioBytes, 'base64');
           fs.writeFileSync(`${fileName}.m4a`, chunk);
           fs.writeFileSync(`${fileName}.wav`, '');
-          const convert = async () =>
-            await this.convertFileFormat(
-              `${fileName}.m4a`,
-              `${fileName}.wav`,
-              function (errorMessage) {},
-              null,
-              function () {
-                // this.scoreLogger.log('convert');
-                s3Put();
-              },
-            );
-          convert();
 
           // this.scoreLogger.log(
           //   `wrote ${buffer.byteLength.toLocaleString()} bytes to file.`,
           // );
-          const fileContent = fs.readFileSync(`${fileName}.wav`);
-          const s3Client = new S3Client({ region: REGION });
-          const s3Params = {
-            Bucket: 'line-data-cloud', // The name of the bucket. For example, 'sample-bucket-101'.
-            Key: `${fileName}.wav`, // The name of the object. For example, 'sample_upload.txt'.
-            Body: fileContent, // The content of the object. For example, 'Hello world!".
-          };
 
           const s3Put = async () => {
+            const fileContent = fs.readFileSync(`${fileName}.wav`);
+            const s3Client = new S3Client({ region: REGION });
+            const s3Params = {
+              Bucket: 'line-data-cloud', // The name of the bucket. For example, 'sample-bucket-101'.
+              Key: `${fileName}.wav`, // The name of the object. For example, 'sample_upload.txt'.
+              Body: fileContent, // The content of the object. For example, 'Hello world!".
+            };
             try {
               const results = await s3Client.send(
                 new PutObjectCommand(s3Params),
@@ -168,6 +156,19 @@ export class ScoreService {
               this.scoreLogger.log('Error', err);
             }
           };
+
+          const convert = async () =>
+            await this.convertFileFormat(
+              `${fileName}.m4a`,
+              `${fileName}.wav`,
+              function (errorMessage) {},
+              null,
+              function () {
+                // this.scoreLogger.log('convert');
+                s3Put();
+              },
+            );
+          convert();
         });
         stream.on('error', (err) => {
           // error handling
