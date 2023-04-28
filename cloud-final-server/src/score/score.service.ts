@@ -166,11 +166,13 @@ export class ScoreService {
               null,
               function () {
                 // this.scoreLogger.log('convert');
-                s3Put();
+                // s3Put();
               },
             );
           };
-          convert();
+          convert().then((res) => {
+            s3Put();
+          });
         });
         stream.on('error', (err) => {
           // error handling
@@ -233,7 +235,7 @@ export class ScoreService {
           this.scoreLogger.log('converting format finished !');
         })
         .writeToStream(outStream, { end: true });
-      finish();
+      // finish();
       return resolve('done!');
     });
   }
