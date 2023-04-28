@@ -15,6 +15,7 @@ import { ScoreResponseDto } from 'src/dto/scoreResponse.dto';
 import { StartTranscriptionJobCommand } from '@aws-sdk/client-transcribe';
 import { S3Client } from '@aws-sdk/client-s3';
 import { PutObjectCommand, CreateBucketCommand } from '@aws-sdk/client-s3';
+import { Client } from '@line/bot-sdk';
 
 const speech = require('@google-cloud/speech');
 const line = require('@line/bot-sdk');
@@ -79,8 +80,9 @@ export class ScoreService {
     this.scoreLogger.log('getScore: start');
     this.scoreLogger.log('messageId', scoreRequestDto.messageId);
     this.scoreLogger.log('userId', scoreRequestDto.userId);
-    const lineClient = new line.Client({
+    const lineClient = new Client({
       channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+      channelSecret: process.env.LINE_CHANNEL_SECRET,
     });
     let audioBytes;
     let hasError = false;
