@@ -168,11 +168,13 @@ export class ScoreService {
                 // this.scoreLogger.log('convert');
                 // s3Put();
               },
-            );
+            ).then((res) => {
+              if (res === 'done!') {
+                s3Put();
+              }
+            });
           };
-          convert().then((res) => {
-            s3Put();
-          });
+          convert();
         });
         stream.on('error', (err) => {
           // error handling
@@ -215,7 +217,13 @@ export class ScoreService {
     return scoreBoard;
   }
 
-  convertFileFormat(file, destination, error, progressing, finish) {
+  convertFileFormat(
+    file,
+    destination,
+    error,
+    progressing,
+    finish,
+  ): Promise<string> {
     return new Promise((resolve, reject) => {
       const inStream = fs.createReadStream(file);
       const outStream = fs.createWriteStream(destination);
