@@ -109,7 +109,9 @@ export class ScoreService {
     const fileName = 'audio.wav';
     fs.writeFileSync(fileName, buffer);
     const fileContent = fs.readFileSync(fileName);
-    console.log(`wrote ${buffer.byteLength.toLocaleString()} bytes to file.`);
+    this.scoreLogger.log(
+      `wrote ${buffer.byteLength.toLocaleString()} bytes to file.`,
+    );
 
     const s3Client = new S3Client({ region: REGION });
     const s3Params = {
@@ -120,7 +122,7 @@ export class ScoreService {
 
     try {
       const results = await s3Client.send(new PutObjectCommand(s3Params));
-      console.log(
+      this.scoreLogger.log(
         'Successfully created ' +
           s3Params.Key +
           ' and uploaded it to ' +
@@ -130,7 +132,7 @@ export class ScoreService {
       );
       // return results; // For unit tests.
     } catch (err) {
-      console.log('Error', err);
+      this.scoreLogger.log('Error', err);
     }
     fs.unlinkSync(fileName);
 
