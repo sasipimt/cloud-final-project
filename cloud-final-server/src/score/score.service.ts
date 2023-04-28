@@ -172,6 +172,7 @@ export class ScoreService {
               this.scoreLogger.log('res done', res);
               if (res === 'done!') {
                 let size = fs.statSync(`${fileName}.wav`).size;
+                this.scoreLogger.log('res size', size);
                 while (size === 0) {
                   size = fs.statSync(`${fileName}.wav`).size;
                 }
