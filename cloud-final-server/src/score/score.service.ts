@@ -169,6 +169,7 @@ export class ScoreService {
                 // s3Put();
               },
             ).then((res) => {
+              this.scoreLogger.log('res done');
               if (res === 'done!') {
                 let size = fs.statSync(`${fileName}.wav`).size;
                 while (size === 0) {
