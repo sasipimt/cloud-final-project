@@ -88,15 +88,16 @@ export class ScoreService {
     lineClient.getMessageContent(scoreRequestDto.messageId).then((stream) => {
       stream.on('data', (chunk) => {
         audioBytes = chunk.toString('base64');
+        this.scoreLogger.log('audioBytes: ', audioBytes);
       });
       stream.on('error', (err) => {
         // error handling
         hasError = true;
+        this.scoreLogger.log('err: ', err);
         console.log(err);
       });
     });
 
-    this.scoreLogger.log('audioBytes: ', audioBytes);
     const buffer = Buffer.from(audioBytes, 'base64');
     const fileName = 'audio.wav';
     fs.writeFileSync(fileName, buffer);
