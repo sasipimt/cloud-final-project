@@ -87,79 +87,78 @@ export class ScoreService {
     let audioBytes;
 
     const fileName = 'audio.wav';
-    const x = async () =>
-      await lineClient
-        .getMessageContent(scoreRequestDto.messageId)
-        .then((stream) => {
-          stream.on('data', (chunk) => {
-            audioBytes = chunk.toString('base64');
-            this.scoreLogger.log('audioBytes: ', audioBytes);
-            const buffer = Buffer.from(audioBytes, 'base64');
-            fs.writeFileSync(fileName, buffer);
-            this.scoreLogger.log(
-              `wrote ${buffer.byteLength.toLocaleString()} bytes to file.`,
-            );
-            const fileContent = fs.readFileSync(fileName);
-            const s3Client = new S3Client({ region: REGION });
-            const s3Params = {
-              Bucket: 'line-data-cloud', // The name of the bucket. For example, 'sample-bucket-101'.
-              Key: fileName, // The name of the object. For example, 'sample_upload.txt'.
-              Body: fileContent, // The content of the object. For example, 'Hello world!".
-            };
+    lineClient
+      .getMessageContent(scoreRequestDto.messageId)
+      .then((stream) => {
+        stream.on('data', (chunk) => {
+          audioBytes = chunk.toString('base64');
+          this.scoreLogger.log('audioBytes: ', audioBytes);
+          const buffer = Buffer.from(audioBytes, 'base64');
+          fs.writeFileSync(fileName, buffer);
+          this.scoreLogger.log(
+            `wrote ${buffer.byteLength.toLocaleString()} bytes to file.`,
+          );
+          const fileContent = fs.readFileSync(fileName);
+          const s3Client = new S3Client({ region: REGION });
+          const s3Params = {
+            Bucket: 'line-data-cloud', // The name of the bucket. For example, 'sample-bucket-101'.
+            Key: fileName, // The name of the object. For example, 'sample_upload.txt'.
+            Body: fileContent, // The content of the object. For example, 'Hello world!".
+          };
 
-            const s3Put = async () => {
-              try {
-                const results = await s3Client.send(
-                  new PutObjectCommand(s3Params),
-                );
-                this.scoreLogger.log(
-                  'Successfully created ' +
-                    s3Params.Key +
-                    ' and uploaded it to ' +
-                    s3Params.Bucket +
-                    '/' +
-                    s3Params.Key,
-                );
-                // return results; // For unit tests.
-              } catch (err) {
-                this.scoreLogger.log('Error', err);
-              }
-              fs.unlinkSync(fileName);
+          const s3Put = async () => {
+            try {
+              const results = await s3Client.send(
+                new PutObjectCommand(s3Params),
+              );
+              this.scoreLogger.log(
+                'Successfully created ' +
+                  s3Params.Key +
+                  ' and uploaded it to ' +
+                  s3Params.Bucket +
+                  '/' +
+                  s3Params.Key,
+              );
+              // return results; // For unit tests.
+            } catch (err) {
+              this.scoreLogger.log('Error', err);
+            }
+            fs.unlinkSync(fileName);
+          };
+          s3Put();
+          const transcribe = async () => {
+            const params = {
+              TranscriptionJobName: 'TEST_TRANSCIBE',
+              LanguageCode: 'th-TH', // For example, 'en-US'
+              MediaFormat: 'wav', // For example, 'wav'
+              Media: {
+                MediaFileUri: `https://line-data-cloud.s3.us-east-2.amazonaws.com/${fileName}`,
+                // For example, "https://transcribe-demo.s3-REGION.amazonaws.com/hello_world.wav"
+              },
+              OutputBucketName: 'line-data-cloud',
             };
-            s3Put();
-            const transcribe = async () => {
-              const params = {
-                TranscriptionJobName: 'TEST_TRANSCIBE',
-                LanguageCode: 'th-TH', // For example, 'en-US'
-                MediaFormat: 'wav', // For example, 'wav'
-                Media: {
-                  MediaFileUri: `https://line-data-cloud.s3.us-east-2.amazonaws.com/${fileName}`,
-                  // For example, "https://transcribe-demo.s3-REGION.amazonaws.com/hello_world.wav"
-                },
-                OutputBucketName: 'line-data-cloud',
-              };
-              const transcribeClient = new TranscribeClient({ region: REGION });
-              try {
-                const data = await transcribeClient.send(
-                  new StartTranscriptionJobCommand(params),
-                );
-                this.scoreLogger.log('Success - put', data);
-                return { score: data }; // For unit tests.
-              } catch (err) {
-                this.scoreLogger.log('Error', err);
-              }
-            };
-            transcribe();
-          });
-          stream.on('error', (err) => {
-            // error handling
-            this.scoreLogger.log('err: ', err);
-            console.log(err);
-          });
-        })
-        .catch((err) => {
-          this.scoreLogger.log('err2: ', err);
+            const transcribeClient = new TranscribeClient({ region: REGION });
+            try {
+              const data = await transcribeClient.send(
+                new StartTranscriptionJobCommand(params),
+              );
+              this.scoreLogger.log('Success - put', data);
+              return { score: data }; // For unit tests.
+            } catch (err) {
+              this.scoreLogger.log('Error', err);
+            }
+          };
+          transcribe();
         });
+        stream.on('error', (err) => {
+          // error handling
+          this.scoreLogger.log('err: ', err);
+          console.log(err);
+        });
+      })
+      .catch((err) => {
+        this.scoreLogger.log('err2: ', err);
+      });
 
     return { score: '0' };
   }
