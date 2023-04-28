@@ -13,7 +13,8 @@ import { config } from 'process';
 import { AudioResponseDto } from 'src/dto/audioResponse.dto';
 import { ScoreResponseDto } from 'src/dto/scoreResponse.dto';
 import { StartTranscriptionJobCommand } from '@aws-sdk/client-transcribe';
-// import { S3 } from 'aws-sdk';
+import { S3Client } from '@aws-sdk/client-s3';
+import { PutObjectCommand, CreateBucketCommand } from '@aws-sdk/client-s3';
 
 const speech = require('@google-cloud/speech');
 const line = require('@line/bot-sdk');
@@ -22,17 +23,6 @@ const path = require('path');
 const { TranscribeClient } = require('@aws-sdk/client-transcribe');
 require('dotenv').config();
 const REGION = 'us-east-2';
-const params = {
-  TranscriptionJobName: 'TEST_TRANSCIBE',
-  LanguageCode: 'th-TH', // For example, 'en-US'
-  MediaFormat: 'wav', // For example, 'wav'
-  Media: {
-    MediaFileUri:
-      'https://line-data-cloud.s3.us-east-2.amazonaws.com/Test_thai.wav',
-    // For example, "https://transcribe-demo.s3-REGION.amazonaws.com/hello_world.wav"
-  },
-  OutputBucketName: 'line-data-cloud',
-};
 
 @Injectable()
 export class ScoreService {
@@ -87,28 +77,67 @@ export class ScoreService {
 
   async getScore(scoreRequestDto: ScoreRequestDto): Promise<ScoreResponseDto> {
     this.scoreLogger.log('getScore: start');
-    // const lineClient = new line.Client({
-    //   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
-    // });
-    // let audioBytes;
-    // let hasError = false;
+    const lineClient = new line.Client({
+      channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+    });
+    let audioBytes;
+    let hasError = false;
 
-    // lineClient.getMessageContent(scoreRequestDto.messageId).then((stream) => {
-    //   stream.on('data', (chunk) => {
-    //     audioBytes = chunk.toString('base64');
-    //   });
-    //   stream.on('error', (err) => {
-    //     // error handling
-    //     hasError = true;
-    //     console.log(err);
-    //   });
-    // });
+    lineClient.getMessageContent(scoreRequestDto.messageId).then((stream) => {
+      stream.on('data', (chunk) => {
+        audioBytes = chunk.toString('base64');
+      });
+      stream.on('error', (err) => {
+        // error handling
+        hasError = true;
+        console.log(err);
+      });
+    });
+
+    const buffer = Buffer.from(audioBytes, 'base64');
+    const fileName = 'audio.wav';
+    fs.writeFileSync(fileName, buffer);
+    const fileContent = fs.readFileSync(fileName);
+    console.log(`wrote ${buffer.byteLength.toLocaleString()} bytes to file.`);
+
+    const s3Client = new S3Client({ region: REGION });
+    const s3Params = {
+      Bucket: 'line-data-cloud', // The name of the bucket. For example, 'sample-bucket-101'.
+      Key: fileName, // The name of the object. For example, 'sample_upload.txt'.
+      Body: fileContent, // The content of the object. For example, 'Hello world!".
+    };
+
+    try {
+      const results = await s3Client.send(new PutObjectCommand(s3Params));
+      console.log(
+        'Successfully created ' +
+          s3Params.Key +
+          ' and uploaded it to ' +
+          s3Params.Bucket +
+          '/' +
+          s3Params.Key,
+      );
+      // return results; // For unit tests.
+    } catch (err) {
+      console.log('Error', err);
+    }
+    fs.unlinkSync(fileName);
 
     // if (!hasError) {
     //   const client = new speech.SpeechClient();
     //   const audio = {
     //     content: audioBytes,
     //   };
+    const params = {
+      TranscriptionJobName: 'TEST_TRANSCIBE',
+      LanguageCode: 'th-TH', // For example, 'en-US'
+      MediaFormat: 'wav', // For example, 'wav'
+      Media: {
+        MediaFileUri: `https://line-data-cloud.s3.us-east-2.amazonaws.com/${fileName}`,
+        // For example, "https://transcribe-demo.s3-REGION.amazonaws.com/hello_world.wav"
+      },
+      OutputBucketName: 'line-data-cloud',
+    };
     const transcribeClient = new TranscribeClient({ region: REGION });
     try {
       const data = await transcribeClient.send(
