@@ -95,19 +95,21 @@ export class ScoreService {
     );
     await stream.on('data', (chunk) => {
       fs.writeFileSync(`${fileName}.m4a`, chunk);
-      fs.writeFileSync(`${fileName}.wav`, '');
+      fs.writeFileSync(`${fileName}.wav`, 'a');
     });
 
-    await stream.on('end', async () => {
+    let x;
+    await stream.on('end', async (scoreRequestDto: ScoreRequestDto) => {
       this.scoreLogger.log('There will be no more data.');
 
-      await this.convertFileFormat(
+      x = await this.convertFileFormat(
         `${fileName}.m4a`,
         `${fileName}.wav`,
         function (errorMessage) {},
         null,
         function () {},
       );
+
       // ).then((res) => {
       //   this.scoreLogger.log('res done', res);
       //   if (res === 'done!') {
@@ -121,19 +123,17 @@ export class ScoreService {
       // });
     });
 
-    await stream.on('error', (err) => {
-      // error handling
-      this.scoreLogger.log('err: ', err);
-      console.log(err);
-    });
+    // await stream.on('error', (err) => {
+    //   // error handling
+    //   this.scoreLogger.log('err: ', err);
+    //   console.log(err);
+    // });
 
-    await this.s3Put(fileName);
-    await this.transcribe(scoreRequestDto, fileName);
     // .catch((err) => {
     //   this.scoreLogger.log('err2: ', err);
     // });
-
-    return { score: '0' };
+    const name = await this.s3Put(x);
+    return await this.transcribe(scoreRequestDto, name);
   }
 
   async getScoreBoard(audioNumber: string): Promise<Array<Score>> {
@@ -165,7 +165,7 @@ export class ScoreService {
   }
 
   convertFileFormat(
-    file,
+    file: string,
     destination,
     error,
     progressing,
@@ -191,7 +191,7 @@ export class ScoreService {
         })
         .writeToStream(outStream, { end: true });
       // finish();
-      return resolve('done!');
+      return resolve(file);
     });
   }
 
@@ -221,6 +221,7 @@ export class ScoreService {
       );
       this.scoreLogger.log('S3put', results);
       // return results; // For unit tests.
+      return fileName;
     } catch (err) {
       this.scoreLogger.log('Error', err);
     }
