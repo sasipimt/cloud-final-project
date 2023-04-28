@@ -77,6 +77,8 @@ export class ScoreService {
 
   async getScore(scoreRequestDto: ScoreRequestDto): Promise<ScoreResponseDto> {
     this.scoreLogger.log('getScore: start');
+    this.scoreLogger.log('messageId', scoreRequestDto.messageId);
+    this.scoreLogger.log('userId', scoreRequestDto.userId);
     const lineClient = new line.Client({
       channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
     });
