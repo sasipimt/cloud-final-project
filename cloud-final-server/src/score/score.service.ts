@@ -231,7 +231,7 @@ export class ScoreService {
           }
         })
         .save(destination);
-      resolve('');
+      return resolve('done!');
     });
   }
 }
