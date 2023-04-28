@@ -125,6 +125,7 @@ export class ScoreService {
                   '/' +
                   s3Params.Key,
               );
+              this.scoreLogger.log('S3put', results);
               transcribe();
               // return results; // For unit tests.
             } catch (err) {
