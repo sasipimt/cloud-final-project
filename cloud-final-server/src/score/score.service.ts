@@ -128,7 +128,7 @@ export class ScoreService {
           s3Put();
           const transcribe = async () => {
             const params = {
-              TranscriptionJobName: 'TEST_TRANSCIBE',
+              TranscriptionJobName: `TRANSCIBE_${fileName}_${scoreRequestDto.messageId}`,
               LanguageCode: 'th-TH', // For example, 'en-US'
               MediaFormat: 'wav', // For example, 'wav'
               Media: {
