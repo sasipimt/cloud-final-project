@@ -21,7 +21,9 @@ const speech = require('@google-cloud/speech');
 const line = require('@line/bot-sdk');
 const fs = require('fs');
 const path = require('path');
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 const ffmpeg = require('fluent-ffmpeg');
+ffmpeg.setFfmpegPath(ffmpegPath);
 const { TranscribeClient } = require('@aws-sdk/client-transcribe');
 require('dotenv').config();
 const REGION = 'us-east-2';
@@ -208,6 +210,7 @@ export class ScoreService {
   convertFileFormat(file, destination, error, progressing, finish) {
     return new Promise((resolve, reject) => {
       ffmpeg(file)
+        .toFormat('wav')
         .on('error', (err) => {
           this.scoreLogger.log('An error occurred: ' + err.message);
           if (error) {
