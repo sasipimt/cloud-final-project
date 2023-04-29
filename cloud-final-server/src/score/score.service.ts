@@ -230,8 +230,8 @@ export class ScoreService {
     } catch (err) {
       this.scoreLogger.log('Error', err);
     }
-    fs.unlinkSync(`${fileName}.m4a`);
-    fs.unlinkSync(`${fileName}.wav`);
+    // fs.unlinkSync(`${fileName}.m4a`);
+    // fs.unlinkSync(`${fileName}.wav`);
   }
 
   async transcribe(
