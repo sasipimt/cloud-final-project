@@ -97,9 +97,9 @@ export class ScoreService {
     const stream = await lineClient.getMessageContent(
       scoreRequestDto.messageId,
     );
-    await stream.on('data', async (chunk) => {
-      await fs.writeFileSync(`${fileName}.m4a`, chunk);
-      await fs.writeFileSync(`${fileName}.wav`, 'a');
+    await stream.on('data', (chunk) => {
+      fs.writeFileSync(`${fileName}.m4a`, chunk);
+      fs.writeFileSync(`${fileName}.wav`, 'a');
     });
 
     await stream.on('end', async () => {
@@ -205,7 +205,7 @@ export class ScoreService {
           break;
         }
       } catch (err) {
-        console.error(err);
+        this.scoreLogger.log('catch:', err);
       }
     }
     const fileContent = fs.readFileSync(`${fileName}.wav`);
