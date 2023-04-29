@@ -55,21 +55,22 @@ export class ScoreService {
       },
     };
     let x = 'err1';
-    const res = await request(options, (error, response, body) => {
+    request(options, (error, response, body) => {
       if (error) {
         x = 'err';
-        return 'err';
+        // return 'err';
         // throw new Error(error);
       }
       // console.log(response.body);
       this.scoreLogger.log('res', response);
       this.scoreLogger.log('resB', body);
-      return body.displayName;
+      x = body.displayName;
+      // return body.displayName;
     });
     // if (res.data.hasOwnProperty('displayName')) {
     //   return res.data['displayName'];
     // }
-    return res;
+    return x;
   }
 
   async getAudio(audioRequestDto: AudioRequestDto): Promise<AudioResponseDto> {
