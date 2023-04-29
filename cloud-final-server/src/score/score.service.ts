@@ -198,7 +198,7 @@ export class ScoreService {
           this.scoreLogger.log('test7');
           return resolve(x);
         })
-        .pipe(outStream);
+        .writeToStream(outStream, { end: true });
       // finish();
       this.scoreLogger.log('test8');
       this.scoreLogger.log('ffmpeg: ', x.toString());
