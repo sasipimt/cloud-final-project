@@ -46,7 +46,7 @@ export class ScoreService {
     private readonly scoreBoardRepository: Repository<ScoreBoard>, // private readonly httpService: HttpService,
   ) {}
   private readonly scoreLogger = new Logger('ScoreService');
-  async getUserDisplayName(userId: string): Promise<string> {
+  async getUserDisplayName(userId: string) {
     const options = {
       method: 'GET',
       url: `https://api.line.me/v2/bot/profile/${userId}`,
@@ -59,7 +59,7 @@ export class ScoreService {
     // if (res.data.hasOwnProperty('displayName')) {
     //   return res.data['displayName'];
     // }
-    return await request(options);
+    return request(options);
   }
 
   async getAudio(audioRequestDto: AudioRequestDto): Promise<AudioResponseDto> {
