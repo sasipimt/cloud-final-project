@@ -71,9 +71,10 @@ export class ScoreService {
       await this.requestHistoryRepository.update(oldUserReq.id, request);
     } else {
       const res = await this.getUserDisplayName(audioRequestDto.userId);
-      this.scoreLogger.log('displayName', res.displayName);
+      const result = JSON.parse(res);
+      this.scoreLogger.log('displayName', result.displayName);
 
-      request.userDisplayName = res.displayName;
+      request.userDisplayName = result.displayName;
 
       await this.requestHistoryRepository.save(request);
     }
