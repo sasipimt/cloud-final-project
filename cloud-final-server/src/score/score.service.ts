@@ -110,7 +110,7 @@ export class ScoreService {
     //   this.scoreLogger.log('There will be no more data.');
     // });
     this.scoreLogger.log('test4');
-    const x = await this.convertFileFormat(
+    await this.convertFileFormat(
       `${fileName}`,
       `${fileName}.wav`,
       function (errorMessage) {},
@@ -119,7 +119,7 @@ export class ScoreService {
     );
 
     this.scoreLogger.log('test9');
-    const name = await this.s3Put(`${fileName}`, x);
+    const name = await this.s3Put(`${fileName}`);
     this.scoreLogger.log('test14');
     const jobName = await this.transcribe(scoreRequestDto, name);
     this.scoreLogger.log('test18');
@@ -208,7 +208,7 @@ export class ScoreService {
     return fileSizeInBytes;
   }
 
-  async s3Put(fileName: string, x: any) {
+  async s3Put(fileName: string) {
     this.scoreLogger.log('test10');
     const fileContent = fs.readFileSync(`${fileName}.wav`);
     const s3Params = {
