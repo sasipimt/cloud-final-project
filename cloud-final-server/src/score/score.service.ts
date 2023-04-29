@@ -193,12 +193,12 @@ export class ScoreService {
         .on('end', () => {
           this.scoreLogger.log('converting format finished !');
           this.scoreLogger.log('test7');
+          return resolve(x);
         })
         .pipe(outStream);
       // finish();
       this.scoreLogger.log('test8');
       this.scoreLogger.log('ffmpeg: ', x.toString());
-      return resolve(x);
     });
   }
 
