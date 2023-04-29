@@ -126,6 +126,9 @@ export class ScoreService {
     let transcriptionStatus = await this.getTranscriptionStatus(jobName);
     while (transcriptionStatus !== 'COMPLETED') {
       transcriptionStatus = await this.getTranscriptionStatus(jobName);
+      if (transcriptionStatus === 'FAILED') {
+        return { score: 'TRANSCRIPTION FAILED' };
+      }
     }
     const transcription = await this.s3GetObject(`${jobName}.json`);
     const transcriptionJSON = JSON.parse(transcription);
