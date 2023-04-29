@@ -81,13 +81,13 @@ export class ScoreService {
     request.audioNumber = audioRequestDto.audioNumber;
 
     const oldUserReq = await this.requestHistoryRepository.findOneBy({
-      userId: request.userId,
+      userId: audioRequestDto.userId,
     });
 
     if (oldUserReq !== null) {
       await this.requestHistoryRepository.update(oldUserReq.id, request);
     } else {
-      const displayName = await this.getUserDisplayName(request.userId);
+      const displayName = await this.getUserDisplayName(audioRequestDto.userId);
       if (displayName !== 'err') {
         request.userDisplayName = displayName;
       }
