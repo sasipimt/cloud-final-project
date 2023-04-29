@@ -192,7 +192,7 @@ export class ScoreService {
   }
 
   getFilesizeInBytes(filename) {
-    var stats = fs.statSync(filename);
+    var stats = fs.stat(filename);
     var fileSizeInBytes = stats.size;
     return fileSizeInBytes;
   }
@@ -200,13 +200,19 @@ export class ScoreService {
   async s3Put(fileName: string) {
     let y = false;
     while (!y) {
-      fs.access(path, fs.F_OK, (err) => {
-        if (err) {
-          console.error(err);
+      fs.stat(`${fileName}.wav`, (error, stats) => {
+        // in case of any error
+        if (error) {
+          console.log(error);
           return;
         }
         y = true;
-        //file exists
+        // else show size from stats object
+        this.scoreLogger.log(
+          'File Size is: ',
+          stats.size / (1024 * 1024),
+          'mb',
+        );
       });
     }
     const fileContent = fs.readFileSync(`${fileName}.wav`);
