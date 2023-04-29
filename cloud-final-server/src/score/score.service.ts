@@ -55,7 +55,7 @@ export class ScoreService {
       },
     };
     let x = 'err1';
-    request(options, (error, response, body) => {
+    await request(options, (error, response, body) => {
       if (error) {
         x = 'err';
         // return 'err';
