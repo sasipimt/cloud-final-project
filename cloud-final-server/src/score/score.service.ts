@@ -99,10 +99,10 @@ export class ScoreService {
       scoreRequestDto.messageId,
     );
     this.scoreLogger.log('test1');
-    await stream.on('data', async (chunk) => {
-      await fsp.writeFile(`${fileName}.m4a`, chunk);
+    await stream.on('data', (chunk) => {
+      fs.writeFileSync(`${fileName}.m4a`, chunk);
       this.scoreLogger.log('test2');
-      await fsp.writeFile(`${fileName}.wav`, 'a');
+      fs.writeFileSync(`${fileName}.wav`, 'a');
       this.scoreLogger.log('test3');
     });
 
