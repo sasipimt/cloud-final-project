@@ -159,14 +159,14 @@ export class ScoreService {
     return scoreBoard;
   }
 
-  convertFileFormat(
+  async convertFileFormat(
     file: string,
     destination,
     error,
     progressing,
     finish,
   ): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       const inStream = fs.createReadStream(`${file}.m4a`);
       const outStream = fs.createWriteStream(destination);
       const x = new ffmpeg({ source: inStream })
