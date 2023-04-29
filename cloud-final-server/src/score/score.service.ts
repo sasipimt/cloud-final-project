@@ -75,7 +75,7 @@ export class ScoreService {
       await this.requestHistoryRepository.update(oldUserReq.id, request);
     } else {
       const displayName = await this.getUserDisplayName(audioRequestDto.userId);
-      this.scoreLogger.log('displayName', displayName);
+      this.scoreLogger.log('displayName', JSON.stringify(displayName));
       if (displayName !== 'err') {
         request.userDisplayName = displayName;
       }
