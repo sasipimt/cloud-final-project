@@ -198,17 +198,16 @@ export class ScoreService {
   }
 
   async s3Put(fileName: string) {
-    while (true) {
-      try {
-        const y = fs.existsSync(`${fileName}.wav`);
-        if (y) {
-          //file exists
-          break;
+    let y = false;
+    while (!y) {
+      fs.access(path, fs.F_OK, (err) => {
+        if (err) {
+          console.error(err);
+          return;
         }
-        this.scoreLogger.log('try:', y);
-      } catch (err) {
-        this.scoreLogger.log('catch:', err);
-      }
+        y = true;
+        //file exists
+      });
     }
     const fileContent = fs.readFileSync(`${fileName}.wav`);
     const s3Params = {
