@@ -200,10 +200,12 @@ export class ScoreService {
   async s3Put(fileName: string) {
     while (true) {
       try {
-        if (fs.existsSync(`${fileName}.wav`)) {
+        const y = fs.existsSync(`${fileName}.wav`);
+        if (y) {
           //file exists
           break;
         }
+        this.scoreLogger.log('try:', y);
       } catch (err) {
         this.scoreLogger.log('catch:', err);
       }
