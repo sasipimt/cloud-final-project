@@ -184,9 +184,14 @@ export class ScoreService {
         .on('end', () => {
           this.scoreLogger.log('converting format finished !');
         })
-        .writeToStream(outStream, { end: true });
+        .pipe(outStream, { end: true });
       // finish();
-      this.scoreLogger.log('ffmpeg: ', x);
+      this.scoreLogger.log(
+        'ffmpeg: ',
+        x.on('end', () => {
+          this.scoreLogger.log('There will be no more data2.');
+        }),
+      );
       return resolve(file);
     });
   }
