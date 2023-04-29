@@ -9,7 +9,7 @@ export class RequestHistory {
   userId: string;
 
   @Column()
-  userDisplayName: string;
+  userDisplayName?: string;
 
   @Column()
   audioNumber: string;

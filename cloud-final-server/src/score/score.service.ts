@@ -66,7 +66,7 @@ export class ScoreService {
     await request(options, function (error, response) {
       if (error) throw new Error(error);
       console.log(response.body);
-      this.scoreLogger.log(response.body);
+      this.scoreLogger.log('request', response.body);
       return response.body.displayName;
     });
     // if (res.data.hasOwnProperty('displayName')) {
