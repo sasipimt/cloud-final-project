@@ -102,16 +102,16 @@ export class ScoreService {
     await stream.on('data', (chunk) => {
       fs.writeFileSync(`${fileName}.m4a`, chunk);
       this.scoreLogger.log('test2');
-      fs.writeFileSync(`${fileName}.wav`, 'a');
-      this.scoreLogger.log('test3');
     });
 
     await stream.on('error', (err) => {
+      this.scoreLogger.log('test3');
+    });
+    await stream.on('end', async () => {
+      this.scoreLogger.log('There will be no more data.');
+      fs.writeFileSync(`${fileName}.wav`, 'a');
       this.scoreLogger.log('test3.5');
     });
-    // await stream.on('end', async () => {
-    //   this.scoreLogger.log('There will be no more data.');
-    // });
     this.scoreLogger.log('test4');
     await this.convertFileFormat(
       `${fileName}`,
