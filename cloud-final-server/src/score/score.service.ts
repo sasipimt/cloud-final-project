@@ -22,7 +22,8 @@ import { Client } from '@line/bot-sdk';
 
 const speech = require('@google-cloud/speech');
 const line = require('@line/bot-sdk');
-const fs = require('fs').promises;
+const fs = require('fs');
+const fsp = fs.promises;
 const path = require('path');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 const ffmpeg = require('fluent-ffmpeg');
@@ -98,8 +99,8 @@ export class ScoreService {
       scoreRequestDto.messageId,
     );
     await stream.on('data', async (chunk) => {
-      await fs.writeFile(`${fileName}.m4a`, chunk);
-      await fs.writeFile(`${fileName}.wav`, 'a');
+      await fsp.writeFile(`${fileName}.m4a`, chunk);
+      await fsp.writeFile(`${fileName}.wav`, 'a');
     });
 
     // await stream.on('end', async () => {
