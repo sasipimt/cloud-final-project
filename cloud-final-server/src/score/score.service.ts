@@ -54,23 +54,12 @@ export class ScoreService {
         Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
       },
     };
-    let x = 'err1';
-    await request(options, (error, response, body) => {
-      if (error) {
-        x = 'err';
-        // return 'err';
-        // throw new Error(error);
-      }
-      // console.log(response.body);
-      this.scoreLogger.log('res', response);
-      this.scoreLogger.log('resB', body);
-      x = body.displayName;
-      // return body.displayName;
-    });
+    // let x = 'err1';
+    // const x =
     // if (res.data.hasOwnProperty('displayName')) {
     //   return res.data['displayName'];
     // }
-    return x;
+    return await request(options);
   }
 
   async getAudio(audioRequestDto: AudioRequestDto): Promise<AudioResponseDto> {
