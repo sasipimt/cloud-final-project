@@ -62,11 +62,11 @@ export class ScoreService {
     const request: RequestHistory = new RequestHistory();
     request.userId = audioRequestDto.userId;
     request.audioNumber = audioRequestDto.audioNumber;
-    this.scoreLogger.log('RequestHistory', request);
+    this.scoreLogger.log('RequestHistory', JSON.stringify(request));
     const oldUserReq = await this.requestHistoryRepository.findOneBy({
       userId: audioRequestDto.userId,
     });
-    this.scoreLogger.log('oldUserReq', oldUserReq);
+    this.scoreLogger.log('oldUserReq', JSON.stringify(oldUserReq));
     if (oldUserReq !== null) {
       await this.requestHistoryRepository.update(oldUserReq.id, request);
     } else {
@@ -78,7 +78,7 @@ export class ScoreService {
 
       await this.requestHistoryRepository.save(request);
     }
-    this.scoreLogger.log('requestEnd', request);
+    this.scoreLogger.log('requestEnd', JSON.stringify(request));
 
     return {
       audioUrl: `https://line-data-cloud.s3.us-east-2.amazonaws.com/${audioRequestDto.audioNumber}.m4a`,
