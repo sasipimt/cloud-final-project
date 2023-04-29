@@ -59,8 +59,8 @@ export class ScoreService {
         return 'err';
         // throw new Error(error);
       }
-      console.log(response.body);
-      this.scoreLogger.log('res', response.body);
+      // console.log(response.body);
+      this.scoreLogger.log('res', response.body.displayName);
       return response.body.displayName;
     });
     // if (res.data.hasOwnProperty('displayName')) {
@@ -73,20 +73,22 @@ export class ScoreService {
     const request: RequestHistory = new RequestHistory();
     request.userId = audioRequestDto.userId;
     request.audioNumber = audioRequestDto.audioNumber;
-
+    this.scoreLogger.log('RequestHistory', request);
     const oldUserReq = await this.requestHistoryRepository.findOneBy({
       userId: audioRequestDto.userId,
     });
-
+    this.scoreLogger.log('oldUserReq', oldUserReq);
     if (oldUserReq !== null) {
       await this.requestHistoryRepository.update(oldUserReq.id, request);
     } else {
       const displayName = await this.getUserDisplayName(audioRequestDto.userId);
+      this.scoreLogger.log('displayName', displayName);
       if (displayName !== 'err') {
         request.userDisplayName = displayName;
       }
       await this.requestHistoryRepository.save(request);
     }
+    this.scoreLogger.log('requestEnd', request);
 
     return {
       audioUrl: `https://line-data-cloud.s3.us-east-2.amazonaws.com/${audioRequestDto.audioNumber}.m4a`,
