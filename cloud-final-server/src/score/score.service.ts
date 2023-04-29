@@ -184,7 +184,7 @@ export class ScoreService {
         .on('end', () => {
           this.scoreLogger.log('converting format finished !');
         })
-        .pipe(outStream, { end: true });
+        .pipe(outStream);
       // finish();
       this.scoreLogger.log('ffmpeg: ', x.toString());
       return resolve(file);
@@ -198,23 +198,6 @@ export class ScoreService {
   }
 
   async s3Put(fileName: string) {
-    let y = false;
-    while (!y) {
-      fs.stat(`${fileName}.wav`, (error, stats) => {
-        // in case of any error
-        if (error) {
-          this.scoreLogger.log(error);
-          return;
-        }
-        y = true;
-        // else show size from stats object
-        this.scoreLogger.log(
-          'File Size is: ',
-          stats.size / (1024 * 1024),
-          'mb',
-        );
-      });
-    }
     const fileContent = fs.readFileSync(`${fileName}.wav`);
     const s3Params = {
       Bucket: 'line-data-cloud', // The name of the bucket. For example, 'sample-bucket-101'.
