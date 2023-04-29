@@ -32,6 +32,7 @@ const { TranscribeClient } = require('@aws-sdk/client-transcribe');
 require('dotenv').config();
 const REGION = 'us-east-2';
 const s3Client = new S3Client({ region: REGION });
+const fileType = '.mp4';
 
 @Injectable()
 export class ScoreService {
@@ -100,7 +101,7 @@ export class ScoreService {
     );
     this.scoreLogger.log('test1');
     await stream.on('data', (chunk) => {
-      fs.writeFileSync(`${fileName}.m4a`, chunk);
+      fs.writeFileSync(`${fileName}${fileType}`, chunk);
       this.scoreLogger.log('chunk: ', chunk);
       this.scoreLogger.log('test2');
     });
@@ -182,7 +183,7 @@ export class ScoreService {
   ): Promise<string> {
     return new Promise((resolve, reject) => {
       this.scoreLogger.log('test5');
-      const inStream = fs.createReadStream(`${file}.m4a`);
+      const inStream = fs.createReadStream(`${file}${fileType}`);
       const outStream = fs.createWriteStream(destination);
       const x = new ffmpeg({ source: inStream })
         .toFormat('wav')
