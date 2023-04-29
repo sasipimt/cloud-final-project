@@ -8,7 +8,7 @@ export class RequestHistory {
   @Column()
   userId: string;
 
-  @Column()
+  @Column({ nullable: true })
   userDisplayName?: string;
 
   @Column()
