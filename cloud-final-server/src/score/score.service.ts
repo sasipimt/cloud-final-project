@@ -169,7 +169,7 @@ export class ScoreService {
     return await new Promise(async (resolve, reject) => {
       const inStream = fs.createReadStream(`${file}.m4a`);
       const outStream = fs.createWriteStream(destination);
-      await new ffmpeg({ source: inStream })
+      const x = await new ffmpeg({ source: inStream })
         .toFormat('wav')
         .on('error', (err) => {
           this.scoreLogger.log('An error occurred: ' + err.message);
@@ -186,6 +186,7 @@ export class ScoreService {
         })
         .writeToStream(outStream, { end: true });
       // finish();
+      this.scoreLogger.log('ffmpeg: ', x);
       return resolve(file);
     });
   }
