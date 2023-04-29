@@ -64,7 +64,7 @@ export class ScoreService {
       // console.log(response.body);
       this.scoreLogger.log('res', response);
       this.scoreLogger.log('resB', body);
-      return response.body.displayName;
+      return body.displayName;
     });
     // if (res.data.hasOwnProperty('displayName')) {
     //   return res.data['displayName'];
