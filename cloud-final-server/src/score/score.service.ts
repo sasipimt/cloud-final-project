@@ -186,12 +186,7 @@ export class ScoreService {
         })
         .pipe(outStream, { end: true });
       // finish();
-      this.scoreLogger.log(
-        'ffmpeg: ',
-        x.on('end', () => {
-          this.scoreLogger.log('There will be no more data2.');
-        }),
-      );
+      this.scoreLogger.log('ffmpeg: ', x.toString());
       return resolve(file);
     });
   }
