@@ -33,7 +33,7 @@ require('dotenv').config();
 const REGION = 'us-east-2';
 const s3Client = new S3Client({ region: REGION });
 const fileType = '.m4a';
-const request = require('request');
+const request = require('request-promise');
 
 @Injectable()
 export class ScoreService {
