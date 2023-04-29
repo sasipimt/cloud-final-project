@@ -43,9 +43,8 @@ export class ScoreService {
     @InjectRepository(Score)
     private readonly scoreRepository: Repository<Score>,
     @InjectRepository(ScoreBoard)
-    private readonly scoreBoardRepository: Repository<ScoreBoard>,
-  ) // private readonly httpService: HttpService,
-  {}
+    private readonly scoreBoardRepository: Repository<ScoreBoard>, // private readonly httpService: HttpService,
+  ) {}
   private readonly scoreLogger = new Logger('ScoreService');
   async getUserDisplayName(userId: string): Promise<string> {
     // const res = await firstValueFrom(
@@ -63,8 +62,11 @@ export class ScoreService {
         Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
       },
     };
-    await request(options, function (error, response) {
-      if (error) throw new Error(error);
+    const res = await request(options, function (error, response) {
+      if (error) {
+        return 'err';
+        // throw new Error(error);
+      }
       console.log(response.body);
       this.scoreLogger.log('request', response.body);
       return response.body.displayName;
@@ -72,7 +74,7 @@ export class ScoreService {
     // if (res.data.hasOwnProperty('displayName')) {
     //   return res.data['displayName'];
     // }
-    return 'err';
+    return res;
   }
 
   async getAudio(audioRequestDto: AudioRequestDto): Promise<AudioResponseDto> {
