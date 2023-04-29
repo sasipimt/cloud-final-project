@@ -116,13 +116,19 @@ export class ScoreService {
 
     const name = await this.s3Put(x);
     const jobName = await this.transcribe(scoreRequestDto, name);
-    let transciptionStatus = await this.getTransciptionStatus(jobName);
-    while (transciptionStatus !== 'COMPLETED') {
-      transciptionStatus = await this.getTransciptionStatus(jobName);
+    let transcriptionStatus = await this.getTranscriptionStatus(jobName);
+    while (transcriptionStatus !== 'COMPLETED') {
+      transcriptionStatus = await this.getTranscriptionStatus(jobName);
     }
-    const transciption = await this.s3GetObject(`${jobName}.json`);
-    const transciptionJSON = JSON.parse(transciption);
-    return { score: transciptionJSON };
+    const transcription = await this.s3GetObject(`${jobName}.json`);
+    const transcriptionJSON = JSON.parse(transcription);
+    let transcriptionWords = [];
+    for (let item of transcriptionJSON.results.items) {
+      if (item.type === 'pronunciation') {
+        transcriptionWords.push(item.alternatives[0].content);
+      }
+    }
+    return { score: transcriptionWords.toString() };
   }
 
   async getScoreBoard(audioNumber: string): Promise<Array<Score>> {
@@ -244,7 +250,7 @@ export class ScoreService {
     }
   }
 
-  async getTransciptionStatus(jobName: string): Promise<string> {
+  async getTranscriptionStatus(jobName: string): Promise<string> {
     const client = new TranscribeClient({ region: REGION });
     const input = {
       // GetTranscriptionJobRequest
