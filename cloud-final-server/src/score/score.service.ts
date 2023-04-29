@@ -185,6 +185,9 @@ export class ScoreService {
       this.scoreLogger.log('test5');
       const inStream = fs.createReadStream(`${file}${fileType}`);
       const outStream = fs.createWriteStream(destination);
+      ffmpeg.ffprobe(inStream, (err, meta) => {
+        this.scoreLogger.log(meta);
+      });
       const x = new ffmpeg({ source: inStream })
         .toFormat('wav')
         .on('error', (err) => {
