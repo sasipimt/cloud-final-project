@@ -54,11 +54,7 @@ export class ScoreService {
         Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
       },
     };
-    // let x = 'err1';
-    // const x =
-    // if (res.data.hasOwnProperty('displayName')) {
-    //   return res.data['displayName'];
-    // }
+
     return request(options);
   }
 
@@ -74,11 +70,11 @@ export class ScoreService {
     if (oldUserReq !== null) {
       await this.requestHistoryRepository.update(oldUserReq.id, request);
     } else {
-      const displayName = await this.getUserDisplayName(audioRequestDto.userId);
-      this.scoreLogger.log('displayName', JSON.stringify(displayName));
-      if (displayName !== 'err') {
-        request.userDisplayName = displayName;
-      }
+      const res = await this.getUserDisplayName(audioRequestDto.userId);
+      this.scoreLogger.log('displayName', res.displayName);
+
+      request.userDisplayName = res.displayName;
+
       await this.requestHistoryRepository.save(request);
     }
     this.scoreLogger.log('requestEnd', request);
