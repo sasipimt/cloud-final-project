@@ -106,6 +106,9 @@ export class ScoreService {
       this.scoreLogger.log('test3');
     });
 
+    await stream.on('error', (err) => {
+      this.scoreLogger.log('test3.5');
+    });
     // await stream.on('end', async () => {
     //   this.scoreLogger.log('There will be no more data.');
     // });
