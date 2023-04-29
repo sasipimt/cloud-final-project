@@ -32,7 +32,7 @@ const { TranscribeClient } = require('@aws-sdk/client-transcribe');
 require('dotenv').config();
 const REGION = 'us-east-2';
 const s3Client = new S3Client({ region: REGION });
-const fileType = '.wav';
+const fileType = '.aac';
 
 @Injectable()
 export class ScoreService {
