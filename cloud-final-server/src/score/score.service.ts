@@ -115,7 +115,7 @@ export class ScoreService {
       function () {},
     );
 
-    const name = await this.s3Put(x);
+    const name = await this.s3Put(`${fileName}`, x);
     const jobName = await this.transcribe(scoreRequestDto, name);
     let transcriptionStatus = await this.getTranscriptionStatus(jobName);
     while (transcriptionStatus !== 'COMPLETED') {
@@ -188,7 +188,7 @@ export class ScoreService {
         .pipe(outStream);
       // finish();
       this.scoreLogger.log('ffmpeg: ', x.toString());
-      return resolve(file);
+      return resolve(x);
     });
   }
 
@@ -198,7 +198,7 @@ export class ScoreService {
     return fileSizeInBytes;
   }
 
-  async s3Put(fileName: string) {
+  async s3Put(fileName: string, x: any) {
     const fileContent = fs.readFileSync(`${fileName}.wav`);
     const s3Params = {
       Bucket: 'line-data-cloud', // The name of the bucket. For example, 'sample-bucket-101'.
