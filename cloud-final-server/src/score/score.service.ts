@@ -44,8 +44,8 @@ export class ScoreService {
     private readonly scoreRepository: Repository<Score>,
     @InjectRepository(ScoreBoard)
     private readonly scoreBoardRepository: Repository<ScoreBoard>,
-    private readonly httpService: HttpService,
-  ) {}
+  ) // private readonly httpService: HttpService,
+  {}
   private readonly scoreLogger = new Logger('ScoreService');
   async getUserDisplayName(userId: string): Promise<string> {
     // const res = await firstValueFrom(
