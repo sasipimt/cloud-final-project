@@ -12,9 +12,12 @@ import { AxiosResponse, AxiosRequestConfig } from 'axios';
 import { config } from 'process';
 import { AudioResponseDto } from 'src/dto/audioResponse.dto';
 import { ScoreResponseDto } from 'src/dto/scoreResponse.dto';
-import { StartTranscriptionJobCommand } from '@aws-sdk/client-transcribe';
+import {
+  StartTranscriptionJobCommand,
+  GetTranscriptionJobCommand,
+} from '@aws-sdk/client-transcribe';
 import { S3Client } from '@aws-sdk/client-s3';
-import { PutObjectCommand, CreateBucketCommand } from '@aws-sdk/client-s3';
+import { PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Client } from '@line/bot-sdk';
 
 const speech = require('@google-cloud/speech');
@@ -27,6 +30,7 @@ ffmpeg.setFfmpegPath(ffmpegPath);
 const { TranscribeClient } = require('@aws-sdk/client-transcribe');
 require('dotenv').config();
 const REGION = 'us-east-2';
+const s3Client = new S3Client({ region: REGION });
 
 @Injectable()
 export class ScoreService {
@@ -100,29 +104,8 @@ export class ScoreService {
 
     await stream.on('end', async () => {
       this.scoreLogger.log('There will be no more data.');
-
-      // ).then((res) => {
-      //   this.scoreLogger.log('res done', res);
-      //   if (res === 'done!') {
-      //     let size = fs.statSync(`${fileName}.wav`).size;
-      //     this.scoreLogger.log('res size', size);
-      //     while (size === 0) {
-      //       size = fs.statSync(`${fileName}.wav`).size;
-      //     }
-      //     this.scoreLogger.log('res size after while', size);
-      //   }
-      // });
     });
 
-    // await stream.on('error', (err) => {
-    //   // error handling
-    //   this.scoreLogger.log('err: ', err);
-    //   console.log(err);
-    // });
-
-    // .catch((err) => {
-    //   this.scoreLogger.log('err2: ', err);
-    // });
     const x = await this.convertFileFormat(
       `${fileName}`,
       `${fileName}.wav`,
@@ -132,7 +115,13 @@ export class ScoreService {
     );
 
     const name = await this.s3Put(x);
-    return await this.transcribe(scoreRequestDto, name);
+    const jobName = await this.transcribe(scoreRequestDto, name);
+    let transciptionStatus = await this.getTransciptionStatus(jobName);
+    while (transciptionStatus !== 'COMPLETED') {
+      transciptionStatus = await this.getTransciptionStatus(jobName);
+    }
+    const transciption = await this.s3GetObject(`${jobName}.json`);
+    return { score: transciption };
   }
 
   async getScoreBoard(audioNumber: string): Promise<Array<Score>> {
@@ -202,7 +191,6 @@ export class ScoreService {
 
   async s3Put(fileName: string) {
     const fileContent = fs.readFileSync(`${fileName}.wav`);
-    const s3Client = new S3Client({ region: REGION });
     const s3Params = {
       Bucket: 'line-data-cloud', // The name of the bucket. For example, 'sample-bucket-101'.
       Key: `${fileName}.wav`, // The name of the object. For example, 'sample_upload.txt'.
@@ -228,7 +216,10 @@ export class ScoreService {
     // fs.unlinkSync(`${fileName}.wav`);
   }
 
-  async transcribe(scoreRequestDto: ScoreRequestDto, fileName: string) {
+  async transcribe(
+    scoreRequestDto: ScoreRequestDto,
+    fileName: string,
+  ): Promise<string> {
     const params = {
       TranscriptionJobName: `TRANSCIBE_${scoreRequestDto.messageId}`,
       LanguageCode: 'th-TH', // For example, 'en-US'
@@ -245,9 +236,38 @@ export class ScoreService {
         new StartTranscriptionJobCommand(params),
       );
       this.scoreLogger.log('Success - put', data);
-      return { score: data }; // For unit tests.
+      // return { score: data }; // For unit tests.
+      return `TRANSCIBE_${scoreRequestDto.messageId}`;
     } catch (err) {
       this.scoreLogger.log('Error', err);
+    }
+  }
+
+  async getTransciptionStatus(jobName: string): Promise<string> {
+    const client = new TranscribeClient({ region: REGION });
+    const input = {
+      // GetTranscriptionJobRequest
+      TranscriptionJobName: jobName, // required
+    };
+    const command = new GetTranscriptionJobCommand(input);
+    const response = await client.send(command);
+    return response.TranscriptionJob.TranscriptionJobStatus;
+  }
+
+  async s3GetObject(transciptionName: string): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: 'line-data-cloud',
+      Key: transciptionName,
+    });
+
+    try {
+      const response = await s3Client.send(command);
+      // The Body object also has 'transformToByteArray' and 'transformToWebStream' methods.
+      const str = await response.Body.transformToString();
+      console.log(str);
+      return str;
+    } catch (err) {
+      console.error(err);
     }
   }
 }
