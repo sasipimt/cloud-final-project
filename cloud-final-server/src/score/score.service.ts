@@ -54,13 +54,16 @@ export class ScoreService {
         Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
       },
     };
-    const res = await request(options, (error, response) => {
+    let x = 'err1';
+    const res = await request(options, (error, response, body) => {
       if (error) {
+        x = 'err';
         return 'err';
         // throw new Error(error);
       }
       // console.log(response.body);
-      this.scoreLogger.log('res', response.body.displayName);
+      this.scoreLogger.log('res', response);
+      this.scoreLogger.log('resB', body);
       return response.body.displayName;
     });
     // if (res.data.hasOwnProperty('displayName')) {
