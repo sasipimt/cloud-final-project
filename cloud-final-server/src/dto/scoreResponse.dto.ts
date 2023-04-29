@@ -1,3 +1,4 @@
 export class ScoreResponseDto {
-  score: string;
+  score: number;
+  transcription: string;
 }

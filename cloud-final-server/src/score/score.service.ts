@@ -32,7 +32,7 @@ const { TranscribeClient } = require('@aws-sdk/client-transcribe');
 require('dotenv').config();
 const REGION = 'us-east-2';
 const s3Client = new S3Client({ region: REGION });
-const fileType = '.aiff';
+const fileType = '.m4a';
 
 @Injectable()
 export class ScoreService {
@@ -132,7 +132,7 @@ export class ScoreService {
     while (transcriptionStatus !== 'COMPLETED') {
       transcriptionStatus = await this.getTranscriptionStatus(jobName);
       if (transcriptionStatus === 'FAILED') {
-        return { score: 'TRANSCRIPTION FAILED' };
+        return { score: 0, transcription: 'TRANSCRIPTION FAILED' };
       }
     }
     const transcription = await this.s3GetObject(`${jobName}.json`);
@@ -143,35 +143,42 @@ export class ScoreService {
         transcriptionWords.push(item.alternatives[0].content);
       }
     }
-    return { score: transcriptionWords.toString() };
+    const score = Math.random();
+    await this.saveScore(scoreRequestDto.userId, score);
+    return {
+      score: score,
+      transcription: transcriptionWords.toString(),
+    };
   }
 
   async getScoreBoard(audioNumber: string): Promise<Array<Score>> {
-    let scoreBoard = [];
-    const ranks = await this.scoreBoardRepository.findOneBy({
-      audioNumber: audioNumber,
-    });
-    if (ranks !== null) {
-      if (ranks.fisrtRank !== null) {
-        const fisrtRank = await this.scoreRepository.findOneBy({
-          id: ranks.fisrtRank,
-        });
-        scoreBoard.push(fisrtRank);
-      }
-      if (ranks.secondRank !== null) {
-        const secondRank = await this.scoreRepository.findOneBy({
-          id: ranks.secondRank,
-        });
-        scoreBoard.push(secondRank);
-      }
-      if (ranks.thirdRank !== null) {
-        const thirdRank = await this.scoreRepository.findOneBy({
-          id: ranks.thirdRank,
-        });
-        scoreBoard.push(thirdRank);
-      }
-    }
+    const scoreBoard = await this.scoreRepository
+      .createQueryBuilder('Score')
+      .where((audioNumber = audioNumber))
+      .orderBy('userScore', 'DESC')
+      .distinct(true)
+      .take(3)
+      .getMany();
     return scoreBoard;
+  }
+
+  async saveScore(userId: string, score: number) {
+    const requestHistory = await this.requestHistoryRepository.findOne({
+      where: [{ userId: userId }],
+      order: { id: 'DESC' },
+    });
+    if (requestHistory.audioNumber !== null) {
+      const ranks = await this.scoreBoardRepository.findOneBy({
+        audioNumber: requestHistory.audioNumber,
+      });
+
+      const newScore: Score = new Score();
+      newScore.audioNumber = requestHistory.audioNumber;
+      newScore.userId = userId;
+      newScore.userDisplayName = requestHistory.userDisplayName;
+      newScore.userScore = score;
+      this.scoreRepository.save(newScore);
+    }
   }
 
   convertFileFormat(
