@@ -121,7 +121,8 @@ export class ScoreService {
       transciptionStatus = await this.getTransciptionStatus(jobName);
     }
     const transciption = await this.s3GetObject(`${jobName}.json`);
-    return { score: transciption };
+    const transciptionJSON = JSON.parse(transciption);
+    return { score: transciptionJSON };
   }
 
   async getScoreBoard(audioNumber: string): Promise<Array<Score>> {
