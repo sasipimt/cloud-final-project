@@ -47,14 +47,6 @@ export class ScoreService {
   ) {}
   private readonly scoreLogger = new Logger('ScoreService');
   async getUserDisplayName(userId: string): Promise<string> {
-    // const res = await firstValueFrom(
-    //   this.httpService.get(`https://api.line.me/v2/bot/profile/${userId}`, {
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
-    //     },
-    //   }),
-    // );
     const options = {
       method: 'GET',
       url: `https://api.line.me/v2/bot/profile/${userId}`,
@@ -62,13 +54,13 @@ export class ScoreService {
         Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
       },
     };
-    const res = await request(options, function (error, response) {
+    const res = await request(options, (error, response) => {
       if (error) {
         return 'err';
         // throw new Error(error);
       }
       console.log(response.body);
-      this.scoreLogger.log('request', response.body);
+      this.scoreLogger.log('res', response.body);
       return response.body.displayName;
     });
     // if (res.data.hasOwnProperty('displayName')) {
