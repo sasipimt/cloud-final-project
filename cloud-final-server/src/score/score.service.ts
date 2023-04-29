@@ -98,15 +98,18 @@ export class ScoreService {
     const stream = await lineClient.getMessageContent(
       scoreRequestDto.messageId,
     );
+    this.scoreLogger.log('test1');
     await stream.on('data', async (chunk) => {
       await fsp.writeFile(`${fileName}.m4a`, chunk);
+      this.scoreLogger.log('test2');
       await fsp.writeFile(`${fileName}.wav`, 'a');
+      this.scoreLogger.log('test3');
     });
 
     // await stream.on('end', async () => {
     //   this.scoreLogger.log('There will be no more data.');
     // });
-
+    this.scoreLogger.log('test4');
     const x = await this.convertFileFormat(
       `${fileName}`,
       `${fileName}.wav`,
@@ -115,8 +118,11 @@ export class ScoreService {
       function () {},
     );
 
+    this.scoreLogger.log('test9');
     const name = await this.s3Put(`${fileName}`, x);
+    this.scoreLogger.log('test14');
     const jobName = await this.transcribe(scoreRequestDto, name);
+    this.scoreLogger.log('test18');
     let transcriptionStatus = await this.getTranscriptionStatus(jobName);
     while (transcriptionStatus !== 'COMPLETED') {
       transcriptionStatus = await this.getTranscriptionStatus(jobName);
@@ -168,6 +174,7 @@ export class ScoreService {
     finish,
   ): Promise<string> {
     return new Promise((resolve, reject) => {
+      this.scoreLogger.log('test5');
       const inStream = fs.createReadStream(`${file}.m4a`);
       const outStream = fs.createWriteStream(destination);
       const x = new ffmpeg({ source: inStream })
@@ -181,12 +188,15 @@ export class ScoreService {
           this.scoreLogger.log(
             'Processing: ' + progress.targetSize + ' KB converted',
           );
+          this.scoreLogger.log('test6');
         })
         .on('end', () => {
           this.scoreLogger.log('converting format finished !');
+          this.scoreLogger.log('test7');
         })
         .pipe(outStream);
       // finish();
+      this.scoreLogger.log('test8');
       this.scoreLogger.log('ffmpeg: ', x.toString());
       return resolve(x);
     });
@@ -199,6 +209,7 @@ export class ScoreService {
   }
 
   async s3Put(fileName: string, x: any) {
+    this.scoreLogger.log('test10');
     const fileContent = fs.readFileSync(`${fileName}.wav`);
     const s3Params = {
       Bucket: 'line-data-cloud', // The name of the bucket. For example, 'sample-bucket-101'.
@@ -206,7 +217,9 @@ export class ScoreService {
       Body: fileContent, // The content of the object. For example, 'Hello world!".
     };
     try {
+      this.scoreLogger.log('test11');
       const results = await s3Client.send(new PutObjectCommand(s3Params));
+      this.scoreLogger.log('test12');
       this.scoreLogger.log(
         'Successfully created ' +
           s3Params.Key +
@@ -216,6 +229,7 @@ export class ScoreService {
           s3Params.Key,
       );
       this.scoreLogger.log('S3put', results);
+      this.scoreLogger.log('test13');
       // return results; // For unit tests.
       return fileName;
     } catch (err) {
@@ -229,6 +243,7 @@ export class ScoreService {
     scoreRequestDto: ScoreRequestDto,
     fileName: string,
   ): Promise<string> {
+    this.scoreLogger.log('test15');
     const params = {
       TranscriptionJobName: `TRANSCIBE_${scoreRequestDto.messageId}`,
       LanguageCode: 'th-TH', // For example, 'en-US'
@@ -241,9 +256,11 @@ export class ScoreService {
     };
     const transcribeClient = new TranscribeClient({ region: REGION });
     try {
+      this.scoreLogger.log('test16');
       const data = await transcribeClient.send(
         new StartTranscriptionJobCommand(params),
       );
+      this.scoreLogger.log('test17');
       this.scoreLogger.log('Success - put', data);
       // return { score: data }; // For unit tests.
       return `TRANSCIBE_${scoreRequestDto.messageId}`;
