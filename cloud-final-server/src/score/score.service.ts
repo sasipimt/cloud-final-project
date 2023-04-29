@@ -198,6 +198,16 @@ export class ScoreService {
   }
 
   async s3Put(fileName: string) {
+    while (true) {
+      try {
+        if (fs.existsSync(`${fileName}.wav`)) {
+          //file exists
+          break;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
     const fileContent = fs.readFileSync(`${fileName}.wav`);
     const s3Params = {
       Bucket: 'line-data-cloud', // The name of the bucket. For example, 'sample-bucket-101'.
