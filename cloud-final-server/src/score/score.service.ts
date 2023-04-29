@@ -33,6 +33,7 @@ require('dotenv').config();
 const REGION = 'us-east-2';
 const s3Client = new S3Client({ region: REGION });
 const fileType = '.m4a';
+const request = require('request');
 
 @Injectable()
 export class ScoreService {
@@ -47,17 +48,29 @@ export class ScoreService {
   ) {}
   private readonly scoreLogger = new Logger('ScoreService');
   async getUserDisplayName(userId: string): Promise<string> {
-    const res = await firstValueFrom(
-      this.httpService.get(`https://api.line.me/v2/bot/profile/${userId}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
-        },
-      }),
-    );
-    if (res.data.hasOwnProperty('displayName')) {
-      return res.data['displayName'];
-    }
+    // const res = await firstValueFrom(
+    //   this.httpService.get(`https://api.line.me/v2/bot/profile/${userId}`, {
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
+    //     },
+    //   }),
+    // );
+    const options = {
+      method: 'GET',
+      url: `https://api.line.me/v2/bot/profile/${userId}`,
+      headers: {
+        Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
+      },
+    };
+    request(options, function (error, response) {
+      if (error) throw new Error(error);
+      console.log(response.body);
+      return response.displayName;
+    });
+    // if (res.data.hasOwnProperty('displayName')) {
+    //   return res.data['displayName'];
+    // }
     return 'err';
   }
 
