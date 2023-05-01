@@ -72,6 +72,7 @@ export class UtilService {
         ],
       }),
     );
+    this.utilLogger.log('line header', JSON.stringify(LINE_HEADER));
     request({
       method: `POST`,
       uri: `${LINE_MESSAGING_API}/reply`,
