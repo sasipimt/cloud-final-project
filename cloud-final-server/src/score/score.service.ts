@@ -120,19 +120,21 @@ export class ScoreService {
           flags: 'a',
         });
         const x = await stream
-          .on('data', (chunk) => {
+          .on('data', async (chunk) => {
             // fs.appendFileSync(`${fileName}${fileType}`, chunk, (err) => {
             //   if (err) {
             //     console.error(err);
             //   }
             // });
             // this.scoreLogger.log('chunk: ', chunk);
-            writer.write(chunk);
+            await writer.write(chunk);
             this.scoreLogger.log('test2');
           })
           .on('end', () => {
             // fs.writeFileSync(`${fileName}${fileType}`, d);
-            resolve(x);
+            writer.on('finish', () => {
+              resolve(x);
+            });
           });
       });
     };
