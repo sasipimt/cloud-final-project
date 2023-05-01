@@ -34,6 +34,7 @@ const REGION = 'us-east-2';
 const s3Client = new S3Client({ region: REGION });
 const fileType = '.m4a';
 const request = require('request-promise');
+const LCS = require('lcs');
 
 @Injectable()
 export class ScoreService {
@@ -152,7 +153,12 @@ export class ScoreService {
         transcriptionWords.push(item.alternatives[0].content);
       }
     }
-    const score = Math.floor(Math.random() * 100);
+    let words = '';
+    transcriptionWords.map((w) => {
+      words = words + w;
+    });
+    const score = new LCS('นี่คือข้อ1', words);
+    // const score = Math.floor(Math.random() * 100);
     this.scoreLogger.log('test19', score);
     const oldUserScore = await this.scoreRepository.findOneBy({
       userId: scoreRequestDto.userId,
