@@ -156,7 +156,8 @@ export class ScoreService {
       .createQueryBuilder('Score')
       .where((audioNumber = audioNumber))
       .orderBy('userScore', 'DESC')
-      .distinct(true)
+      .distinctOn(['Score.userId'])
+      // .distinct(true)
       .take(3)
       .getMany();
     return scoreBoard;
