@@ -279,6 +279,17 @@ export class ScoreService {
       // finish();
       const x = await ffmpeg(`src/${file}${fileType}`)
         .format('wav')
+        .on('error', (err) => {
+          this.scoreLogger.log('An error occurred: ' + err.message);
+          return reject(new Error(err));
+        })
+        .on('progress', (progress) => {
+          // console.log(JSON.stringify(progress));
+          this.scoreLogger.log(
+            'Processing: ' + progress.targetSize + ' KB converted',
+          );
+          this.scoreLogger.log('test6');
+        })
         .on('end', () => {
           this.scoreLogger.log('converting format finished !');
           this.scoreLogger.log('test7');
