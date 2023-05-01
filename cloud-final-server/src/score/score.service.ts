@@ -278,7 +278,7 @@ export class ScoreService {
       //   .duration('0:15')
       //   .writeToStream(outStream, { end: true });
       // finish();
-      const context = new AudioContext();
+      const context = new window.AudioContext();
       fs.readFileSync(`${file}${fileType}`, function (err, data) {
         if (err) throw err;
         console.log(data);
