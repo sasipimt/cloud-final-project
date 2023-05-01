@@ -128,11 +128,19 @@ export class ScoreService {
     this.scoreLogger.log('test14');
     const jobName = await this.transcribe(scoreRequestDto, name);
     this.scoreLogger.log('test18');
+    const oldUserReq = await this.requestHistoryRepository.findOne({
+      where: [{ userId: scoreRequestDto.userId }],
+      order: { id: 'DESC' },
+    });
     let transcriptionStatus = await this.getTranscriptionStatus(jobName);
     while (transcriptionStatus !== 'COMPLETED') {
       transcriptionStatus = await this.getTranscriptionStatus(jobName);
       if (transcriptionStatus === 'FAILED') {
-        return { score: 0, transcription: 'TRANSCRIPTION FAILED' };
+        return {
+          score: 0,
+          transcription: 'TRANSCRIPTION FAILED',
+          audioNumber: oldUserReq.audioNumber,
+        };
       }
     }
     const transcription = await this.s3GetObject(`${jobName}.json`);
@@ -147,6 +155,7 @@ export class ScoreService {
 
     const oldUserScore = await this.scoreRepository.findOneBy({
       userId: scoreRequestDto.userId,
+      audioNumber: oldUserReq.audioNumber,
     });
     // this.scoreLogger.log('oldUserReq', JSON.stringify(oldUserReq));
     if (oldUserScore !== null) {
@@ -156,14 +165,17 @@ export class ScoreService {
         newScore.userDisplayName = oldUserScore.userDisplayName;
         newScore.userId = oldUserScore.userId;
         newScore.userScore = score;
-        await this.scoreRepository.update(oldUserScore.id, newScore);
+        const x = await this.scoreRepository.update(oldUserScore.id, newScore);
+        this.scoreLogger.log('new High score', JSON.stringify(x));
       }
     } else {
-      await this.saveScore(scoreRequestDto.userId, score);
+      const y = await this.saveScore(scoreRequestDto.userId, score);
+      this.scoreLogger.log('new score score', JSON.stringify(y));
     }
     return {
       score: score,
       transcription: transcriptionWords.toString(),
+      audioNumber: oldUserReq.audioNumber,
     };
   }
 
