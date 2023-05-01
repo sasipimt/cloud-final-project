@@ -157,6 +157,7 @@ export class ScoreService {
       .select('DISTINCT Score.userId', 'userId')
       .addSelect('userDisplayName')
       .addSelect('userScore')
+      .addSelect('audioNumber')
       .where((audioNumber = audioNumber))
       .orderBy('userScore', 'DESC')
       // .distinct(['Score.userId'])
