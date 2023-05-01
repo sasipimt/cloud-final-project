@@ -63,17 +63,6 @@ export class UtilService {
       audioNumber: body.audioNumber,
     });
 
-    this.utilLogger.log(
-      'start request',
-      JSON.stringify({
-        replyToken: body.replyToken,
-        messages: [
-          this.yourResult(body.score, body.transcription),
-          scoreboard_json,
-        ],
-      }),
-    );
-    this.utilLogger.log('line header', JSON.stringify(LINE_HEADER));
     request({
       method: `POST`,
       uri: `${LINE_MESSAGING_API}/reply`,
