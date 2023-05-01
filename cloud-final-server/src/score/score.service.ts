@@ -110,12 +110,15 @@ export class ScoreService {
       scoreRequestDto.messageId,
     );
     this.scoreLogger.log('test1');
-    let writer = fs.createWriteStream(`${fileName}${fileType}`, { flags: 'a' });
+
     let d = '';
 
     const saveFile = async () => {
       return new Promise(async (resolve) => {
         // fs.writeFileSync(`${fileName}${fileType}`, '');
+        let writer = await fs.createWriteStream(`${fileName}${fileType}`, {
+          flags: 'a',
+        });
         const x = await stream
           .on('data', (chunk) => {
             // fs.appendFileSync(`${fileName}${fileType}`, chunk, (err) => {
