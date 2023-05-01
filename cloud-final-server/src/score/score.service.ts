@@ -96,6 +96,7 @@ export class ScoreService {
     this.scoreLogger.log('getScore: start');
     this.scoreLogger.log('messageId', scoreRequestDto.messageId);
     this.scoreLogger.log('userId', scoreRequestDto.userId);
+    this.scoreLogger.log('token', scoreRequestDto.replyToken);
     const lineClient = new Client({
       channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
       channelSecret: process.env.LINE_CHANNEL_SECRET,
