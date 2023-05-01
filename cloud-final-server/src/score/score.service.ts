@@ -154,9 +154,12 @@ export class ScoreService {
   async getScoreBoard(audioNumber: string): Promise<Array<Score>> {
     const scoreBoard = await this.scoreRepository
       .createQueryBuilder('Score')
+      .select('DISTINCT Score.userId', 'userId')
+      .addSelect('userDisplayName')
+      .addSelect('userScore')
       .where((audioNumber = audioNumber))
       .orderBy('userScore', 'DESC')
-      .distinctOn(['Score.userId'])
+      // .distinct(['Score.userId'])
       // .distinct(true)
       .take(3)
       .getMany();
