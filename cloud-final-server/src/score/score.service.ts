@@ -277,9 +277,9 @@ export class ScoreService {
       //   .duration('0:15')
       //   .writeToStream(outStream, { end: true });
       // finish();
-      ffmpeg(`src/${file}${fileType}`).format('wav');
+      const x = await ffmpeg(`src/${file}${fileType}`).format('wav');
       this.scoreLogger.log('test8');
-      resolve('a');
+      resolve(x);
       // this.scoreLogger.log('ffmpeg: ', x.toString());
     });
   }
