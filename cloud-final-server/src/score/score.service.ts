@@ -255,7 +255,7 @@ export class ScoreService {
     return new Promise(async (resolve, reject) => {
       this.scoreLogger.log('test5');
       // const inStream = await fs.createReadStream(`${file}${fileType}`);
-      // const outStream = await fs.createWriteStream(destination);
+      const outStream = await fs.createWriteStream(destination);
       // const x = new ffmpeg({ source: inStream })
       //   .toFormat('wav')
       //   .on('error', (err) => {
