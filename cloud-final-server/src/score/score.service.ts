@@ -151,7 +151,7 @@ export class ScoreService {
         transcriptionWords.push(item.alternatives[0].content);
       }
     }
-    const score = Math.random();
+    const score = Math.floor(Math.random() * 100);
 
     const oldUserScore = await this.scoreRepository.findOneBy({
       userId: scoreRequestDto.userId,
