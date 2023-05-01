@@ -112,12 +112,13 @@ export class ScoreService {
     this.scoreLogger.log('test1');
     // let writer = fs.createWriteStream(`${fileName}${fileType}`);
     let d = '';
-    fs.writeFileSync(`${fileName}${fileType}`, '');
+
     const saveFile = async () => {
       return new Promise(async (resolve) => {
+        fs.writeFileSync(`${fileName}${fileType}`, '');
         const x = await stream
           .on('data', (chunk) => {
-            fs.appendFile(`${fileName}${fileType}`, chunk, (err) => {
+            fs.appendFileSync(`${fileName}${fileType}`, chunk, (err) => {
               if (err) {
                 console.error(err);
               }
