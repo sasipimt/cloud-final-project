@@ -110,17 +110,41 @@ export class ScoreService {
       scoreRequestDto.messageId,
     );
     this.scoreLogger.log('test1');
-    await stream
-      .on('data', (chunk) => {
-        fs.writeFileSync(`${fileName}${fileType}`, chunk);
-        // this.scoreLogger.log('chunk: ', chunk);
-        this.scoreLogger.log('test2');
-      })
-      .on('end', () => {
-        return new Promise((resolve) => {
+    let writer = fs.createWriteStream(`${fileName}${fileType}`);
+    const saveFile = async () => {
+      return new Promise((resolve) => {
+        stream.on('data', (chunk) => {
+          // fs.writeFileSync(`${fileName}${fileType}`, chunk);
+          // this.scoreLogger.log('chunk: ', chunk);
+          writer.write(chunk);
+          this.scoreLogger.log('test2');
+        });
+        writer.on('finish', function () {
+          console.log('file downloaded to ', '..');
+
           resolve('a');
         });
       });
+    };
+    await saveFile();
+    // await stream
+    //   .on('data', (chunk) => {
+    //     // fs.writeFileSync(`${fileName}${fileType}`, chunk);
+    //     // this.scoreLogger.log('chunk: ', chunk);
+    //     writer.write(chunk);
+    //     this.scoreLogger.log('test2');
+    //   })
+    //   writer.on("finish", function () {
+    //     console.log("file downloaded to ", "..");
+    //     return new Promise((resolve) => {
+    //       resolve('a');
+    //     });
+    //   });
+    //   .on('end', () => {
+    //     return new Promise((resolve) => {
+    //       resolve('a');
+    //     });
+    //   });
 
     await stream.on('error', (err) => {
       this.scoreLogger.log('test3');
