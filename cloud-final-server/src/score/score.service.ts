@@ -277,7 +277,7 @@ export class ScoreService {
       //   .duration('0:15')
       //   .writeToStream(outStream, { end: true });
       // finish();
-      const x = await ffmpeg(`src/${file}${fileType}`)
+      const x = await new ffmpeg(`src/${file}${fileType}`)
         .format('wav')
         .on('error', (err) => {
           this.scoreLogger.log('An error occurred: ' + err.message);
