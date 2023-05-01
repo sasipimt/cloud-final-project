@@ -40,6 +40,7 @@ const s3Client = new S3Client({ region: REGION });
 const fileType = '.m4a';
 const request = require('request-promise');
 const LCS = require('lcs');
+const toWav = require('audiobuffer-to-wav');
 
 @Injectable()
 export class ScoreService {
@@ -254,7 +255,7 @@ export class ScoreService {
   ): Promise<string> {
     return new Promise(async (resolve, reject) => {
       this.scoreLogger.log('test5');
-      // const inStream = await fs.createReadStream(`${file}${fileType}`);
+      const inStream = await fs.createReadStream(`${file}${fileType}`);
       const outStream = await fs.createWriteStream(destination);
       // const x = new ffmpeg({ source: inStream })
       //   .toFormat('wav')
@@ -277,24 +278,23 @@ export class ScoreService {
       //   .duration('0:15')
       //   .writeToStream(outStream, { end: true });
       // finish();
-      const x = await new ffmpeg(`src/${file}${fileType}`)
-        .format('wav')
-        .on('error', (err) => {
-          this.scoreLogger.log('An error occurred: ' + err.message);
-          return reject(new Error(err));
-        })
-        .on('progress', (progress) => {
-          // console.log(JSON.stringify(progress));
-          this.scoreLogger.log(
-            'Processing: ' + progress.targetSize + ' KB converted',
-          );
-          this.scoreLogger.log('test6');
-        })
-        .on('end', () => {
-          this.scoreLogger.log('converting format finished !');
-          this.scoreLogger.log('test7');
-          return resolve('a');
+      const context = new AudioContext();
+      fs.readFileSync(`${file}${fileType}`, function (err, data) {
+        if (err) throw err;
+        console.log(data);
+        context.decodeAudioData(data, function (buffer) {
+          // encode AudioBuffer to WAV
+          const wav = toWav(buffer);
+          fs.writeFileSync(destination, wav).on('end', () => {
+            this.scoreLogger.log('converting format finished !');
+            this.scoreLogger.log('test7');
+            return resolve(wav);
+          });
+
+          // do something with the WAV ArrayBuffer ...
         });
+      });
+
       this.scoreLogger.log('test8');
       // this.scoreLogger.log('ffmpeg: ', x.toString());
     });
