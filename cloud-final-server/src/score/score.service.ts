@@ -157,6 +157,11 @@ export class ScoreService {
       userId: scoreRequestDto.userId,
       audioNumber: oldUserReq.audioNumber,
     });
+    let newScore = new Score();
+    newScore.audioNumber = oldUserReq.audioNumber;
+    newScore.userDisplayName = oldUserReq.userDisplayName;
+    newScore.userId = oldUserReq.userId;
+    newScore.userScore = score;
     // this.scoreLogger.log('oldUserReq', JSON.stringify(oldUserReq));
     if (oldUserScore !== null) {
       if (score > oldUserScore.userScore) {
@@ -165,12 +170,12 @@ export class ScoreService {
         newScore.userDisplayName = oldUserScore.userDisplayName;
         newScore.userId = oldUserScore.userId;
         newScore.userScore = score;
-        const x = await this.scoreRepository.update(oldUserScore.id, newScore);
-        this.scoreLogger.log('new High score', JSON.stringify(x));
+        await this.scoreRepository.update(oldUserScore.id, newScore);
+        this.scoreLogger.log('new High score', JSON.stringify(newScore));
       }
     } else {
-      const y = await this.saveScore(scoreRequestDto.userId, score);
-      this.scoreLogger.log('new score score', JSON.stringify(y));
+      await this.saveScore(scoreRequestDto.userId, score);
+      this.scoreLogger.log('new score score', JSON.stringify(newScore));
     }
     return {
       score: score,
