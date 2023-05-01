@@ -377,7 +377,7 @@ export class ScoreService {
       LanguageCode: 'th-TH', // For example, 'en-US'
       MediaFormat: 'mp4', // For example, 'wav'
       Media: {
-        MediaFileUri: `https://line-data-cloud.s3.us-east-2.amazonaws.com/${fileName}.wav`,
+        MediaFileUri: `https://line-data-cloud.s3.us-east-2.amazonaws.com/${fileName}.mp4`,
         // For example, "https://transcribe-demo.s3-REGION.amazonaws.com/hello_world.wav"
       },
       OutputBucketName: 'line-data-cloud',
