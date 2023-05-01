@@ -162,8 +162,8 @@ export class ScoreService {
       ])
       .where('Score.audioNumber = :audioNumber', { audioNumber: audioNumber })
       .orderBy('userScore', 'DESC')
-      // .distinct(['Score.userId'])
-      .distinct(true)
+      .distinctOn(['Score.userId'])
+      // .distinct(true)
       .take(3)
       .getMany();
     return scoreBoard;
