@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Score } from 'src/schema/score.entity';
 const request = require('request-promise');
+require('dotenv').config();
 const LINE_MESSAGING_API = 'https://api.line.me/v2/bot/message';
 const LINE_HEADER = {
   'Content-Type': 'application/json',
