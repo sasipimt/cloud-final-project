@@ -265,6 +265,7 @@ export class ScoreService {
           this.scoreLogger.log('test7');
           return resolve(x);
         })
+        .duration('0:15')
         .writeToStream(outStream, { end: true });
       // finish();
       this.scoreLogger.log('test8');
