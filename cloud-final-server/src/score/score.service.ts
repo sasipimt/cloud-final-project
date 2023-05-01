@@ -128,8 +128,8 @@ export class ScoreService {
             this.scoreLogger.log('test2');
           })
           .on('end', () => {
-            fs.writeFileSync(`${fileName}${fileType}`, d);
-            resolve('a');
+            // fs.writeFileSync(`${fileName}${fileType}`, d);
+            resolve(x);
           });
       });
     };
