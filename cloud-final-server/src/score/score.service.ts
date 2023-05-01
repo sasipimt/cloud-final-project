@@ -109,7 +109,7 @@ export class ScoreService {
     this.scoreLogger.log('test1');
     await stream.on('data', (chunk) => {
       fs.writeFileSync(`${fileName}${fileType}`, chunk);
-      this.scoreLogger.log('chunk: ', chunk);
+      // this.scoreLogger.log('chunk: ', chunk);
       this.scoreLogger.log('test2');
     });
 
