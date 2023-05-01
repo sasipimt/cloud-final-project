@@ -62,17 +62,17 @@ export class ScoreService {
     const request: RequestHistory = new RequestHistory();
     request.userId = audioRequestDto.userId;
     request.audioNumber = audioRequestDto.audioNumber;
-    this.scoreLogger.log('RequestHistory', JSON.stringify(request));
+    // this.scoreLogger.log('RequestHistory', JSON.stringify(request));
     const oldUserReq = await this.requestHistoryRepository.findOneBy({
       userId: audioRequestDto.userId,
     });
-    this.scoreLogger.log('oldUserReq', JSON.stringify(oldUserReq));
+    // this.scoreLogger.log('oldUserReq', JSON.stringify(oldUserReq));
     if (oldUserReq !== null) {
       await this.requestHistoryRepository.update(oldUserReq.id, request);
     } else {
       const res = await this.getUserDisplayName(audioRequestDto.userId);
       const result = JSON.parse(res);
-      this.scoreLogger.log('displayName', result.displayName);
+      // this.scoreLogger.log('displayName', result.displayName);
 
       request.userDisplayName = result.displayName;
 
