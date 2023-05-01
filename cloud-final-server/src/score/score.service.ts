@@ -157,7 +157,7 @@ export class ScoreService {
         transcriptionWords.push(item.alternatives[0].content);
       }
     }
-    await this.s3DeleteObject(`${fileName}`);
+    await this.s3DeleteObject(`${fileName}.wav`);
     let words = '';
     transcriptionWords.map((w) => {
       words = words + w;
