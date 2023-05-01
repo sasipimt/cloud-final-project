@@ -17,7 +17,11 @@ import {
   GetTranscriptionJobCommand,
 } from '@aws-sdk/client-transcribe';
 import { S3Client } from '@aws-sdk/client-s3';
-import { PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import {
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
 import { Client } from '@line/bot-sdk';
 
 const speech = require('@google-cloud/speech');
@@ -153,6 +157,7 @@ export class ScoreService {
         transcriptionWords.push(item.alternatives[0].content);
       }
     }
+    await this.s3DeleteObject(`${fileName}`);
     let words = '';
     transcriptionWords.map((w) => {
       words = words + w;
@@ -190,6 +195,7 @@ export class ScoreService {
       await this.saveScore(scoreRequestDto.userId, score);
       this.scoreLogger.log('new score score', JSON.stringify(newScore));
     }
+    await this.s3DeleteObject(`${jobName}.json`);
     return {
       score: score,
       transcription: words,
@@ -299,8 +305,8 @@ export class ScoreService {
     } catch (err) {
       this.scoreLogger.log('Error', err);
     }
-    // fs.unlinkSync(`${fileName}.m4a`);
-    // fs.unlinkSync(`${fileName}.wav`);
+    fs.unlinkSync(`${fileName}.m4a`);
+    fs.unlinkSync(`${fileName}.wav`);
   }
 
   async transcribe(
@@ -359,5 +365,20 @@ export class ScoreService {
     } catch (err) {
       console.error(err);
     }
+  }
+  async s3DeleteObject(objName: string): Promise<string> {
+    const command = new DeleteObjectCommand({
+      Bucket: 'line-data-cloud',
+      Key: objName,
+    });
+
+    try {
+      const data = await s3Client.send(command);
+      console.log('Success. Object deleted.', data);
+      return 'Object deleted'; // For unit tests.
+    } catch (err) {
+      console.log('Error', err);
+    }
+    return 'err';
   }
 }
