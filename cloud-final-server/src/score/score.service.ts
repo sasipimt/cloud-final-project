@@ -157,7 +157,8 @@ export class ScoreService {
     transcriptionWords.map((w) => {
       words = words + w;
     });
-    const score = new LCS('นี่คือข้อ1', words);
+    const lcs = new LCS('นี่คือข้อ1', words);
+    const score = lcs.getLength();
     // const score = Math.floor(Math.random() * 100);
     this.scoreLogger.log('test19', score);
     const oldUserScore = await this.scoreRepository.findOneBy({
