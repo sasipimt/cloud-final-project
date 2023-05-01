@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Score } from 'src/schema/score.entity';
 const request = require('request-promise');
 const LINE_MESSAGING_API = 'https://api.line.me/v2/bot/message';
@@ -17,7 +17,9 @@ interface Props {
 
 @Injectable()
 export class UtilService {
+  private readonly utilLogger = new Logger('UtilService');
   async replyScoreAndScoreBoard(body: Props) {
+    this.utilLogger.log('start reply', JSON.stringify(body));
     let ranking = [];
     body.ranking.map((user, idx) => {
       ranking.push({
@@ -60,6 +62,16 @@ export class UtilService {
       audioNumber: body.audioNumber,
     });
 
+    this.utilLogger.log(
+      'start request',
+      JSON.stringify({
+        replyToken: body.replyToken,
+        messages: [
+          this.yourResult(body.score, body.transcription),
+          scoreboard_json,
+        ],
+      }),
+    );
     request({
       method: `POST`,
       uri: `${LINE_MESSAGING_API}/reply`,
@@ -73,6 +85,7 @@ export class UtilService {
       }),
     });
   }
+
   scoreBoardJson(body) {
     const contents_list = [
       {
