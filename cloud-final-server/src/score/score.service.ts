@@ -23,6 +23,7 @@ import {
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { Client } from '@line/bot-sdk';
+import { UtilService } from 'src/util/util.service';
 
 const speech = require('@google-cloud/speech');
 const line = require('@line/bot-sdk');
@@ -49,6 +50,7 @@ export class ScoreService {
     private readonly scoreRepository: Repository<Score>,
     @InjectRepository(ScoreBoard)
     private readonly scoreBoardRepository: Repository<ScoreBoard>, // private readonly httpService: HttpService,
+    private readonly util: UtilService,
   ) {}
   private readonly scoreLogger = new Logger('ScoreService');
   async getUserDisplayName(userId: string) {
@@ -196,6 +198,15 @@ export class ScoreService {
       this.scoreLogger.log('new score score', JSON.stringify(newScore));
     }
     await this.s3DeleteObject(`${jobName}.json`);
+    const scoreBoard = await this.getScoreBoard(oldUserReq.audioNumber);
+    await this.util.replyScoreAndScoreBoard({
+      ranking: scoreBoard,
+      userId: scoreRequestDto.userId,
+      replyToken: scoreRequestDto.replyToken,
+      score: score.toString(),
+      transcription: words,
+      audioNumber: oldUserReq.audioNumber,
+    });
     return {
       score: score,
       transcription: words,
