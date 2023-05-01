@@ -144,7 +144,23 @@ export class ScoreService {
       }
     }
     const score = Math.random();
-    await this.saveScore(scoreRequestDto.userId, score);
+
+    const oldUserScore = await this.scoreRepository.findOneBy({
+      userId: scoreRequestDto.userId,
+    });
+    // this.scoreLogger.log('oldUserReq', JSON.stringify(oldUserReq));
+    if (oldUserScore !== null) {
+      if (score > oldUserScore.userScore) {
+        let newScore = new Score();
+        newScore.audioNumber = oldUserScore.audioNumber;
+        newScore.userDisplayName = oldUserScore.userDisplayName;
+        newScore.userId = oldUserScore.userId;
+        newScore.userScore = score;
+        await this.scoreRepository.update(oldUserScore.id, newScore);
+      }
+    } else {
+      await this.saveScore(scoreRequestDto.userId, score);
+    }
     return {
       score: score,
       transcription: transcriptionWords.toString(),
@@ -154,16 +170,9 @@ export class ScoreService {
   async getScoreBoard(audioNumber: string): Promise<Array<Score>> {
     const scoreBoard = await this.scoreRepository
       .createQueryBuilder('Score')
-      .select([
-        'Score.userId',
-        'Score.userDisplayName',
-        'Score.userScore',
-        'Score.audioNumber',
-      ])
-      .where('Score.audioNumber = :audioNumber', { audioNumber: audioNumber })
+      .where((audioNumber = audioNumber))
       .orderBy('userScore', 'DESC')
-      .distinctOn(['Score.userId'])
-      // .distinct(true)
+      .distinct(true)
       .take(3)
       .getMany();
     return scoreBoard;
