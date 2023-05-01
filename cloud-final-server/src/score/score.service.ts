@@ -187,7 +187,7 @@ export class ScoreService {
     }
     return {
       score: score,
-      transcription: transcriptionWords.toString(),
+      transcription: words,
       audioNumber: oldUserReq.audioNumber,
     };
   }
