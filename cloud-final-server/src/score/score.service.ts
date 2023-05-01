@@ -132,6 +132,7 @@ export class ScoreService {
       where: [{ userId: scoreRequestDto.userId }],
       order: { id: 'DESC' },
     });
+    this.scoreLogger.log('oldUserReq', JSON.stringify(oldUserReq));
     let transcriptionStatus = await this.getTranscriptionStatus(jobName);
     while (transcriptionStatus !== 'COMPLETED') {
       transcriptionStatus = await this.getTranscriptionStatus(jobName);
@@ -152,7 +153,7 @@ export class ScoreService {
       }
     }
     const score = Math.floor(Math.random() * 100);
-
+    this.scoreLogger.log('test19', score);
     const oldUserScore = await this.scoreRepository.findOneBy({
       userId: scoreRequestDto.userId,
       audioNumber: oldUserReq.audioNumber,
@@ -173,6 +174,7 @@ export class ScoreService {
         await this.scoreRepository.update(oldUserScore.id, newScore);
         this.scoreLogger.log('new High score', JSON.stringify(newScore));
       }
+      this.scoreLogger.log('new score == old score');
     } else {
       await this.saveScore(scoreRequestDto.userId, score);
       this.scoreLogger.log('new score score', JSON.stringify(newScore));
