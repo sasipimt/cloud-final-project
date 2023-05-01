@@ -254,34 +254,33 @@ export class ScoreService {
   ): Promise<string> {
     return new Promise(async (resolve, reject) => {
       this.scoreLogger.log('test5');
-      const inStream = await fs.createReadStream(`${file}${fileType}`);
-      const outStream = await fs.createWriteStream(destination);
-      ffmpeg.ffprobe(inStream, (err, meta) => {
-        this.scoreLogger.log(meta);
-      });
-      const x = new ffmpeg({ source: inStream })
-        .toFormat('wav')
-        .on('error', (err) => {
-          this.scoreLogger.log('An error occurred: ' + err.message);
-          return reject(new Error(err));
-        })
-        .on('progress', (progress) => {
-          // console.log(JSON.stringify(progress));
-          this.scoreLogger.log(
-            'Processing: ' + progress.targetSize + ' KB converted',
-          );
-          this.scoreLogger.log('test6');
-        })
-        .on('end', () => {
-          this.scoreLogger.log('converting format finished !');
-          this.scoreLogger.log('test7');
-          return resolve(x);
-        })
-        .duration('0:15')
-        .writeToStream(outStream, { end: true });
+      // const inStream = await fs.createReadStream(`${file}${fileType}`);
+      // const outStream = await fs.createWriteStream(destination);
+      // const x = new ffmpeg({ source: inStream })
+      //   .toFormat('wav')
+      //   .on('error', (err) => {
+      //     this.scoreLogger.log('An error occurred: ' + err.message);
+      //     return reject(new Error(err));
+      //   })
+      //   .on('progress', (progress) => {
+      //     // console.log(JSON.stringify(progress));
+      //     this.scoreLogger.log(
+      //       'Processing: ' + progress.targetSize + ' KB converted',
+      //     );
+      //     this.scoreLogger.log('test6');
+      //   })
+      //   .on('end', () => {
+      //     this.scoreLogger.log('converting format finished !');
+      //     this.scoreLogger.log('test7');
+      //     return resolve(x);
+      //   })
+      //   .duration('0:15')
+      //   .writeToStream(outStream, { end: true });
       // finish();
+      ffmpeg(`src/${file}${fileType}`).format('wav');
       this.scoreLogger.log('test8');
-      this.scoreLogger.log('ffmpeg: ', x.toString());
+      resolve('a');
+      // this.scoreLogger.log('ffmpeg: ', x.toString());
     });
   }
 
