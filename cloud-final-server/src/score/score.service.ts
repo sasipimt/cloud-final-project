@@ -24,6 +24,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { Client } from '@line/bot-sdk';
 import { UtilService } from 'src/util/util.service';
+import { resolve } from 'path';
 
 const speech = require('@google-cloud/speech');
 const line = require('@line/bot-sdk');
@@ -109,11 +110,17 @@ export class ScoreService {
       scoreRequestDto.messageId,
     );
     this.scoreLogger.log('test1');
-    await stream.on('data', (chunk) => {
-      fs.writeFileSync(`${fileName}${fileType}`, chunk);
-      // this.scoreLogger.log('chunk: ', chunk);
-      this.scoreLogger.log('test2');
-    });
+    await stream
+      .on('data', (chunk) => {
+        fs.writeFileSync(`${fileName}${fileType}`, chunk);
+        // this.scoreLogger.log('chunk: ', chunk);
+        this.scoreLogger.log('test2');
+      })
+      .on('end', () => {
+        return new Promise((resolve) => {
+          resolve('a');
+        });
+      });
 
     await stream.on('error', (err) => {
       this.scoreLogger.log('test3');
