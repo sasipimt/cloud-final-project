@@ -37,7 +37,7 @@ const { TranscribeClient } = require('@aws-sdk/client-transcribe');
 require('dotenv').config();
 const REGION = 'us-east-2';
 const s3Client = new S3Client({ region: REGION });
-const fileType = '.m4a';
+const fileType = '.mp4';
 const request = require('request-promise');
 const LCS = require('lcs');
 const toWav = require('audiobuffer-to-wav');
@@ -120,17 +120,17 @@ export class ScoreService {
     });
     await stream.on('end', async () => {
       this.scoreLogger.log('There will be no more data.');
-      fs.writeFileSync(`${fileName}.wav`, 'a');
+      // fs.writeFileSync(`${fileName}.wav`, 'a');
       this.scoreLogger.log('test3.5');
     });
     this.scoreLogger.log('test4');
-    await this.convertFileFormat(
-      `${fileName}`,
-      `${fileName}.wav`,
-      function (errorMessage) {},
-      null,
-      function () {},
-    );
+    // await this.convertFileFormat(
+    //   `${fileName}`,
+    //   `${fileName}.wav`,
+    //   function (errorMessage) {},
+    //   null,
+    //   function () {},
+    // );
 
     this.scoreLogger.log('test9');
     const name = await this.s3Put(`${fileName}`);
@@ -308,10 +308,10 @@ export class ScoreService {
 
   async s3Put(fileName: string) {
     this.scoreLogger.log('test10');
-    const fileContent = fs.readFileSync(`${fileName}.wav`);
+    const fileContent = fs.readFileSync(`${fileName}.mp4`);
     const s3Params = {
       Bucket: 'line-data-cloud', // The name of the bucket. For example, 'sample-bucket-101'.
-      Key: `${fileName}.wav`, // The name of the object. For example, 'sample_upload.txt'.
+      Key: `${fileName}.mp4`, // The name of the object. For example, 'sample_upload.txt'.
       Body: fileContent, // The content of the object. For example, 'Hello world!".
     };
     try {
@@ -345,7 +345,7 @@ export class ScoreService {
     const params = {
       TranscriptionJobName: `TRANSCIBE_${scoreRequestDto.messageId}`,
       LanguageCode: 'th-TH', // For example, 'en-US'
-      MediaFormat: 'wav', // For example, 'wav'
+      MediaFormat: 'mp4', // For example, 'wav'
       Media: {
         MediaFileUri: `https://line-data-cloud.s3.us-east-2.amazonaws.com/${fileName}.wav`,
         // For example, "https://transcribe-demo.s3-REGION.amazonaws.com/hello_world.wav"
