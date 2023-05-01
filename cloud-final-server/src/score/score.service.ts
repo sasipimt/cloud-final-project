@@ -158,7 +158,7 @@ export class ScoreService {
       words = words + w;
     });
     const lcs = new LCS('นี่คือข้อหนึ่ง', words);
-    const score = lcs.getLength();
+    const score = Math.floor((lcs.getLength() * 100) / words.length);
     // const score = Math.floor(Math.random() * 100);
     this.scoreLogger.log('test19', score);
     this.scoreLogger.log('seq', lcs.getSequences());
