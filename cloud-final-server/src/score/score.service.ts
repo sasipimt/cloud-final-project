@@ -240,10 +240,10 @@ export class ScoreService {
     progressing,
     finish,
   ): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       this.scoreLogger.log('test5');
-      const inStream = fs.createReadStream(`${file}${fileType}`);
-      const outStream = fs.createWriteStream(destination);
+      const inStream = await fs.createReadStream(`${file}${fileType}`);
+      const outStream = await fs.createWriteStream(destination);
       ffmpeg.ffprobe(inStream, (err, meta) => {
         this.scoreLogger.log(meta);
       });
