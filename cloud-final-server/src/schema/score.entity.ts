@@ -22,6 +22,6 @@ export class Score {
   @Column()
   userScore: number;
 
-  @CreateDateColumn()
+  @Column()
   createdWhen: Date;
 }

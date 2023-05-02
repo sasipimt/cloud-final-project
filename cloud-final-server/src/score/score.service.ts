@@ -247,7 +247,8 @@ export class ScoreService {
       newScore.userId = userId;
       newScore.userDisplayName = requestHistory.userDisplayName;
       newScore.userScore = score;
-      this.scoreRepository.save(newScore);
+      newScore.createdWhen = new Date();
+      await this.scoreRepository.save(newScore);
     }
   }
 
