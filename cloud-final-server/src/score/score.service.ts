@@ -132,10 +132,10 @@ export class ScoreService {
 
             writer.write(chunk);
             this.scoreLogger.log('test1.6');
-            writer.on('finish', () => {
-              this.scoreLogger.log('test1.7');
-              return resolve(x);
-            });
+            // writer.on('finish', () => {
+            //   this.scoreLogger.log('test1.7');
+            //    resolve(x);
+            // });
             this.scoreLogger.log('test2');
           })
           .on('end', () => {
@@ -143,7 +143,7 @@ export class ScoreService {
             this.scoreLogger.log('test2.4');
             writer.on('finish', () => {
               this.scoreLogger.log('test2.5');
-              return resolve(x);
+              resolve(x);
             });
           });
       });
