@@ -114,9 +114,12 @@ export class ScoreService {
     let d = '';
 
     const saveFile = () => {
+      let writer = fs.createWriteStream(`${fileName}${fileType}`, {
+        flags: 'a',
+      });
       return new Promise((resolve) => {
         // fs.writeFileSync(`${fileName}${fileType}`, '');
-        // let writer = await ;
+
         this.scoreLogger.log('test1.5');
         const x = stream
           .on('data', (chunk) => {
@@ -126,24 +129,22 @@ export class ScoreService {
             //   }
             // });
             // this.scoreLogger.log('chunk: ', chunk);
-            fs.createWriteStream(`${fileName}${fileType}`, {
-              flags: 'a',
-            })
-              .write(chunk)
-              .on('finish', () => {
-                this.scoreLogger.log('test1.6');
-                return resolve(x);
-              });
+
+            writer.write(chunk);
+            this.scoreLogger.log('test1.6');
+            writer.on('finish', () => {
+              this.scoreLogger.log('test1.7');
+              return resolve(x);
+            });
             this.scoreLogger.log('test2');
           })
           .on('end', () => {
             // fs.writeFileSync(`${fileName}${fileType}`, d);
-            const y = fs
-              .createReadStream(`${fileName}${fileType}`)
-              .on('finish', () => {
-                this.scoreLogger.log('test2.5');
-                return resolve(y);
-              });
+            this.scoreLogger.log('test2.4');
+            writer.on('finish', () => {
+              this.scoreLogger.log('test2.5');
+              return resolve(x);
+            });
           });
       });
     };
