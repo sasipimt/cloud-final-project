@@ -232,9 +232,9 @@ export class ScoreService {
       .where('score.audioNumber = :audioNumber', { audioNumber: audioNumber })
       // .orderBy('Score.userScore', 'DESC')
       // .addOrderBy('Score.createdWhen', 'ASC')
-      .distinct(true)
-      .take(3)
-      .getMany();
+      // .distinct(true)
+      // .take(3)
+      .getRawMany();
     this.scoreLogger.log('scoreBoard', scoreBoard);
     return scoreBoard;
   }
