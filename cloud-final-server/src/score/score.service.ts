@@ -128,16 +128,21 @@ export class ScoreService {
             // this.scoreLogger.log('chunk: ', chunk);
             fs.createWriteStream(`${fileName}${fileType}`, {
               flags: 'a',
-            }).write(chunk);
+            })
+              .write(chunk)
+              .on('finish', () => {
+                this.scoreLogger.log('test1.6');
+                return resolve(x);
+              });
             this.scoreLogger.log('test2');
           })
           .on('end', () => {
             // fs.writeFileSync(`${fileName}${fileType}`, d);
             const y = fs
-              .readWriteStream(`${fileName}${fileType}`)
+              .createReadStream(`${fileName}${fileType}`)
               .on('finish', () => {
                 this.scoreLogger.log('test2.5');
-                resolve(y);
+                return resolve(y);
               });
           });
       });
