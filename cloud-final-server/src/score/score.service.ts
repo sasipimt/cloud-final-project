@@ -25,6 +25,7 @@ import {
 import { Client } from '@line/bot-sdk';
 import { UtilService } from 'src/util/util.service';
 import { resolve } from 'path';
+import { workerData } from 'worker_threads';
 
 const speech = require('@google-cloud/speech');
 const line = require('@line/bot-sdk');
@@ -43,7 +44,7 @@ const request = require('request-promise');
 const LCS = require('lcs');
 const toWav = require('audiobuffer-to-wav');
 const { Worker, isMainThread, parentPort } = require('worker_threads');
-
+let jobQ: Array<Q> = [];
 @Injectable()
 export class ScoreService {
   constructor(
@@ -95,7 +96,7 @@ export class ScoreService {
     };
   }
 
-  async getScore(scoreRequestDto: ScoreRequestDto): Promise<ScoreResponseDto> {
+  async getScore(scoreRequestDto: ScoreRequestDto) {
     this.scoreLogger.log('getScore: start');
     this.scoreLogger.log('messageId', scoreRequestDto.messageId);
     this.scoreLogger.log('userId', scoreRequestDto.userId);
@@ -149,90 +150,47 @@ export class ScoreService {
     this.scoreLogger.log('oldUserReq', JSON.stringify(oldUserReq));
     this.scoreLogger.log('test18.1');
     // await this.sleep(60000);
+    jobQ.push({ jobName, oldUserReq, fileName, scoreRequestDto });
     if (isMainThread) {
-      return {
-        score: 0,
-        transcription: 'TRANSCRIPTION_IN_PROGRESS',
-        audioNumber: oldUserReq.audioNumber,
-      };
-    } else {
-      this.scoreLogger.log('test18.2');
-      let transcriptionStatus = await this.getTranscriptionStatus(jobName);
-      this.scoreLogger.log('test18.3', transcriptionStatus);
-      while (transcriptionStatus !== 'COMPLETED') {
-        this.scoreLogger.log('test18.4', transcriptionStatus);
-        transcriptionStatus = await this.getTranscriptionStatus(jobName);
-        this.scoreLogger.log('test18.5', transcriptionStatus);
-        if (transcriptionStatus === 'FAILED') {
-          return {
-            score: 0,
-            transcription: 'TRANSCRIPTION FAILED',
-            audioNumber: oldUserReq.audioNumber,
-          };
-        }
+      const threadCount = +process.argv[2] || 2;
+      const threads = new Set<any>();
+      for (let i = 0; i < threadCount - 1; i++) {
+        threads.add(new Worker(__filename, { workerData: jobQ }));
+        jobQ = [];
       }
-      const transcription = await this.s3GetObject(`${jobName}.json`);
-      const transcriptionJSON = JSON.parse(transcription);
-      let transcriptionWords = [];
-      for (let item of transcriptionJSON.results.items) {
-        if (item.type === 'pronunciation') {
-          transcriptionWords.push(item.alternatives[0].content);
-        }
-      }
-      await this.s3DeleteObject(`${fileName}.mp4`);
-      let words = '';
-      transcriptionWords.map((w) => {
-        words = words + w;
-      });
-      const p = 'นี่คือข้อหนึ่ง';
-      const lcs = new LCS(p, words);
-      const score = Math.floor((lcs.getLength() * 100) / p.length);
-      // const score = Math.floor(Math.random() * 100);
-      this.scoreLogger.log('test19', lcs.getLength());
-      this.scoreLogger.log('score', score);
-      this.scoreLogger.log('seq', lcs.getSequences());
 
-      const oldUserScore = await this.scoreRepository.findOneBy({
-        userId: scoreRequestDto.userId,
-        audioNumber: oldUserReq.audioNumber,
-      });
-      let newScore = new Score();
-      newScore.audioNumber = oldUserReq.audioNumber;
-      newScore.userDisplayName = oldUserReq.userDisplayName;
-      newScore.userId = oldUserReq.userId;
-      newScore.userScore = score;
-      // this.scoreLogger.log('oldUserReq', JSON.stringify(oldUserReq));
-      if (oldUserScore !== null) {
-        if (score > oldUserScore.userScore) {
-          let newScore = new Score();
-          newScore.audioNumber = oldUserScore.audioNumber;
-          newScore.userDisplayName = oldUserScore.userDisplayName;
-          newScore.userId = oldUserScore.userId;
-          newScore.userScore = score;
-          await this.scoreRepository.update(oldUserScore.id, newScore);
-          this.scoreLogger.log('new High score', JSON.stringify(newScore));
-        }
-        this.scoreLogger.log('new score == old score');
-      } else {
-        await this.saveScore(scoreRequestDto.userId, score);
-        this.scoreLogger.log('new score score', JSON.stringify(newScore));
+      for (let worker of threads) {
+        worker.on('error', (err) => {
+          throw err;
+        });
+        worker.on('exit', () => {
+          threads.delete(worker);
+          console.log(`Thread exiting, ${threads.size} running...`);
+          if (threads.size === 0) {
+            this.scoreLogger.log('threads.size === 0');
+          }
+        });
+        worker.on('message', (msg) => {
+          this.scoreLogger.log(msg);
+        });
       }
-      await this.s3DeleteObject(`${jobName}.json`);
-      const scoreBoard = await this.getScoreBoard(oldUserReq.audioNumber);
-      await this.util.replyScoreAndScoreBoard({
-        ranking: scoreBoard,
-        userId: scoreRequestDto.userId,
-        replyToken: scoreRequestDto.replyToken,
-        score: score.toString(),
-        transcription: words,
-        audioNumber: oldUserReq.audioNumber,
-      });
-      return {
-        score: score,
-        transcription: words,
-        audioNumber: oldUserReq.audioNumber,
-      };
+    } else {
+      waitTranscribe(workerData.jobQ);
     }
+  }
+  async createWorker(raw) {
+    return new Promise((resolve, reject) => {
+      const worker = new Worker(__filename, {
+        workerData: raw,
+      });
+      worker.on('message', resolve);
+      worker.on('error', reject);
+      worker.on('exit', (code) => {
+        if (code !== 0) {
+          reject(new Error(`Worker stopped with exit code ${code}`));
+        }
+      });
+    });
   }
 
   sleep(ms) {
@@ -372,5 +330,97 @@ export class ScoreService {
       console.log('Error', err);
     }
     return 'err';
+  }
+}
+
+interface Q {
+  jobName: string;
+  oldUserReq: RequestHistory;
+  fileName: string;
+  scoreRequestDto: ScoreRequestDto;
+}
+async function waitTranscribe(arg: Array<Q>) {
+  let status: Array<boolean> = [];
+  for (let i = 0; i < arg.length; i++) {
+    status.push(false);
+  }
+  for (let jobIdx = 0; jobIdx < arg.length; jobIdx++) {
+    if (status[jobIdx]) {
+      continue;
+    }
+    this.scoreLogger.log('test18.2');
+    let transcriptionStatus = await this.getTranscriptionStatus(
+      arg[jobIdx].jobName,
+    );
+    this.scoreLogger.log('test18.3', transcriptionStatus);
+    if (transcriptionStatus === 'FAILED') {
+      status[jobIdx] = true;
+      continue;
+    }
+
+    if (transcriptionStatus === 'COMPLETED') {
+      status[jobIdx] = true;
+
+      const transcription = await this.s3GetObject(
+        `${arg[jobIdx].jobName}.json`,
+      );
+      const transcriptionJSON = JSON.parse(transcription);
+      let transcriptionWords = [];
+      for (let item of transcriptionJSON.results.items) {
+        if (item.type === 'pronunciation') {
+          transcriptionWords.push(item.alternatives[0].content);
+        }
+      }
+      await this.s3DeleteObject(`${arg[jobIdx].fileName}.mp4`);
+      let words = '';
+      transcriptionWords.map((w) => {
+        words = words + w;
+      });
+      const p = 'นี่คือข้อหนึ่ง';
+      const lcs = new LCS(p, words);
+      const score = Math.floor((lcs.getLength() * 100) / p.length);
+      // const score = Math.floor(Math.random() * 100);
+      this.scoreLogger.log('test19', lcs.getLength());
+      this.scoreLogger.log('score', score);
+      this.scoreLogger.log('seq', lcs.getSequences());
+
+      const oldUserScore = await this.scoreRepository.findOneBy({
+        userId: arg[jobIdx].scoreRequestDto.userId,
+        audioNumber: arg[jobIdx].oldUserReq.audioNumber,
+      });
+      let newScore = new Score();
+      newScore.audioNumber = arg[jobIdx].oldUserReq.audioNumber;
+      newScore.userDisplayName = arg[jobIdx].oldUserReq.userDisplayName;
+      newScore.userId = arg[jobIdx].oldUserReq.userId;
+      newScore.userScore = score;
+      // this.scoreLogger.log('oldUserReq', JSON.stringify(oldUserReq));
+      if (oldUserScore !== null) {
+        if (score > oldUserScore.userScore) {
+          let newScore = new Score();
+          newScore.audioNumber = oldUserScore.audioNumber;
+          newScore.userDisplayName = oldUserScore.userDisplayName;
+          newScore.userId = oldUserScore.userId;
+          newScore.userScore = score;
+          await this.scoreRepository.update(oldUserScore.id, newScore);
+          this.scoreLogger.log('new High score', JSON.stringify(newScore));
+        }
+        this.scoreLogger.log('new score == old score');
+      } else {
+        await this.saveScore(arg[jobIdx].scoreRequestDto.userId, score);
+        this.scoreLogger.log('new score score', JSON.stringify(newScore));
+      }
+      await this.s3DeleteObject(`${arg[jobIdx].jobName}.json`);
+      const scoreBoard = await this.getScoreBoard(
+        arg[jobIdx].oldUserReq.audioNumber,
+      );
+      await this.util.replyScoreAndScoreBoard({
+        ranking: scoreBoard,
+        userId: arg[jobIdx].scoreRequestDto.userId,
+        replyToken: arg[jobIdx].scoreRequestDto.replyToken,
+        score: score.toString(),
+        transcription: words,
+        audioNumber: arg[jobIdx].oldUserReq.audioNumber,
+      });
+    }
   }
 }
