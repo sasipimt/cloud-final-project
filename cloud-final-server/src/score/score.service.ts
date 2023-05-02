@@ -151,42 +151,8 @@ export class ScoreService {
       });
     };
     await saveFile();
-    // await stream
-    //   .on('data', (chunk) => {
-    //     // fs.writeFileSync(`${fileName}${fileType}`, chunk);
-    //     // this.scoreLogger.log('chunk: ', chunk);
-    //     writer.write(chunk);
-    //     this.scoreLogger.log('test2');
-    //   })
-    //   writer.on("finish", function () {
-    //     console.log("file downloaded to ", "..");
-    //     return new Promise((resolve) => {
-    //       resolve('a');
-    //     });
-    //   });
-    //   .on('end', () => {
-    //     return new Promise((resolve) => {
-    //       resolve('a');
-    //     });
-    //   });
 
-    await stream.on('error', (err) => {
-      this.scoreLogger.log('test3');
-    });
-    await stream.on('end', async () => {
-      this.scoreLogger.log('There will be no more data.');
-      // fs.writeFileSync(`${fileName}.wav`, 'a');
-      this.scoreLogger.log('test3.5');
-    });
     this.scoreLogger.log('test4');
-    // await this.convertFileFormat(
-    //   `${fileName}`,
-    //   `${fileName}.wav`,
-    //   function (errorMessage) {},
-    //   null,
-    //   function () {},
-    // );
-
     this.scoreLogger.log('test9');
     const name = await this.s3Put(`${fileName}`);
     this.scoreLogger.log('test14');
@@ -197,9 +163,15 @@ export class ScoreService {
       order: { id: 'DESC' },
     });
     this.scoreLogger.log('oldUserReq', JSON.stringify(oldUserReq));
+    this.scoreLogger.log('test18.1');
+    await this.sleep(60000);
+    this.scoreLogger.log('test18.2');
     let transcriptionStatus = await this.getTranscriptionStatus(jobName);
+    this.scoreLogger.log('test18.3', transcriptionStatus);
     while (transcriptionStatus !== 'COMPLETED') {
+      this.scoreLogger.log('test18.4', transcriptionStatus);
       transcriptionStatus = await this.getTranscriptionStatus(jobName);
+      this.scoreLogger.log('test18.5', transcriptionStatus);
       if (transcriptionStatus === 'FAILED') {
         return {
           score: 0,
@@ -216,7 +188,7 @@ export class ScoreService {
         transcriptionWords.push(item.alternatives[0].content);
       }
     }
-    await this.s3DeleteObject(`${fileName}.wav`);
+    await this.s3DeleteObject(`${fileName}.mp4`);
     let words = '';
     transcriptionWords.map((w) => {
       words = words + w;
@@ -271,6 +243,12 @@ export class ScoreService {
     };
   }
 
+  sleep(ms) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
+
   async getScoreBoard(audioNumber: string): Promise<Array<Score>> {
     const scoreBoard = await this.scoreRepository
       .createQueryBuilder('Score')
@@ -301,66 +279,6 @@ export class ScoreService {
     }
   }
 
-  convertFileFormat(
-    file: string,
-    destination,
-    error,
-    progressing,
-    finish,
-  ): Promise<string> {
-    return new Promise(async (resolve, reject) => {
-      this.scoreLogger.log('test5');
-      const inStream = await fs.createReadStream(`${file}${fileType}`);
-      const outStream = await fs.createWriteStream(destination);
-      // const x = new ffmpeg({ source: inStream })
-      //   .toFormat('wav')
-      //   .on('error', (err) => {
-      //     this.scoreLogger.log('An error occurred: ' + err.message);
-      //     return reject(new Error(err));
-      //   })
-      //   .on('progress', (progress) => {
-      //     // console.log(JSON.stringify(progress));
-      //     this.scoreLogger.log(
-      //       'Processing: ' + progress.targetSize + ' KB converted',
-      //     );
-      //     this.scoreLogger.log('test6');
-      //   })
-      //   .on('end', () => {
-      //     this.scoreLogger.log('converting format finished !');
-      //     this.scoreLogger.log('test7');
-      //     return resolve(x);
-      //   })
-      //   .duration('0:15')
-      //   .writeToStream(outStream, { end: true });
-      // finish();
-      const context = new window.AudioContext();
-      fs.readFileSync(`${file}${fileType}`, function (err, data) {
-        if (err) throw err;
-        console.log(data);
-        context.decodeAudioData(data, function (buffer) {
-          // encode AudioBuffer to WAV
-          const wav = toWav(buffer);
-          fs.writeFileSync(destination, wav).on('end', () => {
-            this.scoreLogger.log('converting format finished !');
-            this.scoreLogger.log('test7');
-            return resolve(wav);
-          });
-
-          // do something with the WAV ArrayBuffer ...
-        });
-      });
-
-      this.scoreLogger.log('test8');
-      // this.scoreLogger.log('ffmpeg: ', x.toString());
-    });
-  }
-
-  getFilesizeInBytes(filename) {
-    var stats = fs.stat(filename);
-    var fileSizeInBytes = stats.size;
-    return fileSizeInBytes;
-  }
-
   async s3Put(fileName: string) {
     this.scoreLogger.log('test10');
     const fileContent = fs.readFileSync(`${fileName}.mp4`);
@@ -388,8 +306,7 @@ export class ScoreService {
     } catch (err) {
       this.scoreLogger.log('Error', err);
     }
-    fs.unlinkSync(`${fileName}.m4a`);
-    fs.unlinkSync(`${fileName}.wav`);
+    fs.unlinkSync(`${fileName}.mp4`);
   }
 
   async transcribe(
