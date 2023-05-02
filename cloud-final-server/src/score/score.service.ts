@@ -113,28 +113,27 @@ export class ScoreService {
 
     let d = '';
 
-    const saveFile = async () => {
-      return new Promise(async (resolve) => {
+    const saveFile = () => {
+      return new Promise((resolve) => {
         // fs.writeFileSync(`${fileName}${fileType}`, '');
         // let writer = await ;
-        const x = await stream
-          .on('data', async (chunk) => {
+        this.scoreLogger.log('test1.5');
+        const x = stream
+          .on('data', (chunk) => {
             // fs.appendFileSync(`${fileName}${fileType}`, chunk, (err) => {
             //   if (err) {
             //     console.error(err);
             //   }
             // });
             // this.scoreLogger.log('chunk: ', chunk);
-            await fs
-              .createWriteStream(`${fileName}${fileType}`, {
-                flags: 'a',
-              })
-              .write(chunk);
+            fs.createWriteStream(`${fileName}${fileType}`, {
+              flags: 'a',
+            }).write(chunk);
             this.scoreLogger.log('test2');
           })
           .on('end', () => {
             // fs.writeFileSync(`${fileName}${fileType}`, d);
-
+            this.scoreLogger.log('test2.5');
             resolve(x);
           });
       });
