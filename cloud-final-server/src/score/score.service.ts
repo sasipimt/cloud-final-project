@@ -137,10 +137,12 @@ export class ScoreService {
   }
 
   async getScore(scoreRequestDto: ScoreRequestDto): Promise<ScoreResponseDto> {
+    this.scoreLogger.log('start get score');
     const oldUserReq = await this.requestHistoryRepository.findOne({
       where: [{ userId: scoreRequestDto.userId }],
       order: { id: 'DESC' },
     });
+    this.scoreLogger.log('oldUserReq', JSON.stringify(oldUserReq));
     const jobName = scoreRequestDto.jobName;
 
     const transcriptionStatus = await this.getTranscriptionStatus(jobName);
