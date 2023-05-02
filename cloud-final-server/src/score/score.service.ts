@@ -129,6 +129,10 @@ export class ScoreService {
     const name = await this.s3Put(`${fileName}`);
 
     const jobName = await this.transcribe(submitRequestDto, name);
+    this.util.replyProgress({
+      jobName: jobName,
+      replyToken: submitRequestDto.replyToken,
+    });
     return { jobName };
   }
 
