@@ -232,6 +232,7 @@ export class ScoreService {
       .createQueryBuilder('Score')
       .where((audioNumber = audioNumber))
       .orderBy('userScore', 'DESC')
+      .addOrderBy('id', 'ASC')
       .distinct(true)
       .take(3)
       .getMany();
