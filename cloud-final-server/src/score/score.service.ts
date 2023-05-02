@@ -234,7 +234,7 @@ export class ScoreService {
       // .addOrderBy('Score.createdWhen', 'ASC')
       // .distinct(true)
       // .take(3)
-      .getRawMany();
+      .getMany();
     this.scoreLogger.log('scoreBoard', scoreBoard);
     return scoreBoard;
   }
