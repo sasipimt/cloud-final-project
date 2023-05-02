@@ -77,6 +77,78 @@ export class UtilService {
     });
   }
 
+  async replyProgress(body) {
+    const content = {
+      type: 'flex',
+      altText: 'This is your progress',
+      contents: {
+        type: 'bubble',
+        body: {
+          type: 'box',
+          layout: 'vertical',
+          contents: [
+            {
+              type: 'text',
+              text: 'สถานะ',
+              weight: 'bold',
+              color: '#1DB446',
+              size: 'sm',
+            },
+            {
+              type: 'text',
+              text: 'IN PROGRESS',
+              weight: 'bold',
+              size: 'xl',
+            },
+            {
+              type: 'text',
+              text: `#${body.jobName}`,
+              color: '#aaaaaa',
+            },
+            {
+              type: 'text',
+              text: 'กรุณารอสักครู่ ระบบกำลังฟังที่ท่านพูดมาล่าสุดและคิดคะแนน',
+              wrap: true,
+              margin: 'lg',
+            },
+            {
+              type: 'text',
+              text: 'กดปุ่มด้านล่างเพื่อดูสถานะ',
+              margin: 'lg',
+            },
+          ],
+        },
+        footer: {
+          type: 'box',
+          layout: 'vertical',
+          spacing: 'sm',
+          contents: [
+            {
+              type: 'button',
+              style: 'secondary',
+              height: 'sm',
+              action: {
+                type: 'message',
+                label: 'CHECK',
+                text: `c ${body.jobName}`,
+              },
+            },
+          ],
+          flex: 0,
+        },
+      },
+    };
+    return request({
+      method: `POST`,
+      uri: `${LINE_MESSAGING_API}/reply`,
+      headers: LINE_HEADER,
+      body: JSON.stringify({
+        replyToken: body.replyToken,
+        messages: [content],
+      }),
+    });
+  }
+
   scoreBoardJson(body) {
     const contents_list = [
       {

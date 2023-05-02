@@ -1,5 +1,5 @@
 export class ScoreRequestDto {
   userId: string;
-  messageId: string;
+  jobName: string;
   replyToken: string;
 }
