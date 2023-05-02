@@ -234,6 +234,7 @@ export class ScoreService {
       .distinct(true)
       .take(3)
       .getMany();
+    this.scoreLogger.log('scoreBoard', scoreBoard);
     return scoreBoard;
   }
 
