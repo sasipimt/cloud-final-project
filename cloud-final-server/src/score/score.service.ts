@@ -116,9 +116,7 @@ export class ScoreService {
     const saveFile = async () => {
       return new Promise(async (resolve) => {
         // fs.writeFileSync(`${fileName}${fileType}`, '');
-        let writer = await fs.createWriteStream(`${fileName}${fileType}`, {
-          flags: 'a',
-        });
+        // let writer = await ;
         const x = await stream
           .on('data', async (chunk) => {
             // fs.appendFileSync(`${fileName}${fileType}`, chunk, (err) => {
@@ -127,14 +125,17 @@ export class ScoreService {
             //   }
             // });
             // this.scoreLogger.log('chunk: ', chunk);
-            await writer.write(chunk);
+            await fs
+              .createWriteStream(`${fileName}${fileType}`, {
+                flags: 'a',
+              })
+              .write(chunk);
             this.scoreLogger.log('test2');
           })
           .on('end', () => {
             // fs.writeFileSync(`${fileName}${fileType}`, d);
-            writer.on('finish', () => {
-              resolve(x);
-            });
+
+            resolve(x);
           });
       });
     };
