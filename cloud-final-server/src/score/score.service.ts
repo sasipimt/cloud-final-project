@@ -153,8 +153,10 @@ export class ScoreService {
     jobQ.push({ jobName, oldUserReq, fileName, scoreRequestDto });
     if (isMainThread) {
       const threadCount = +process.argv[2] || 2;
+      this.scoreLogger.log('threadCount:', threadCount);
       const threads = new Set<any>();
       for (let i = 0; i < threadCount - 1; i++) {
+        this.scoreLogger.log('new Worker');
         threads.add(new Worker(__filename, { workerData: jobQ }));
         jobQ = [];
       }
@@ -340,6 +342,7 @@ interface Q {
   scoreRequestDto: ScoreRequestDto;
 }
 async function waitTranscribe(arg: Array<Q>) {
+  this.scoreLogger.log('Start waitTranscribe');
   let status: Array<boolean> = [];
   for (let i = 0; i < arg.length; i++) {
     status.push(false);
