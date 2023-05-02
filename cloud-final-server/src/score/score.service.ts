@@ -199,6 +199,7 @@ export class ScoreService {
           newScore.userDisplayName = oldUserScore.userDisplayName;
           newScore.userId = oldUserScore.userId;
           newScore.userScore = score;
+          newScore.createdWhen = new Date();
           await this.scoreRepository.update(oldUserScore.id, newScore);
           this.scoreLogger.log('new High score', JSON.stringify(newScore));
         }
