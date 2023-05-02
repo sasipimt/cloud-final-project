@@ -140,6 +140,8 @@ export class ScoreService {
           })
           .on('end', () => {
             // fs.writeFileSync(`${fileName}${fileType}`, d);
+            this.scoreLogger.log('test2.3');
+            writer.end();
             this.scoreLogger.log('test2.4');
             writer.on('finish', () => {
               this.scoreLogger.log('test2.5');
