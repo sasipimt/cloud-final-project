@@ -181,6 +181,7 @@ export class UtilService {
               weight: 'regular',
               size: 'lg',
               margin: 'md',
+              wrap: true,
             },
           ],
         },
