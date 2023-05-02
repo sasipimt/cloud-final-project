@@ -329,10 +329,10 @@ export class ScoreService {
     return response.TranscriptionJob.TranscriptionJobStatus;
   }
 
-  async s3GetObject(transciptionName: string): Promise<string> {
+  async s3GetObject(transcriptionName: string): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: 'line-data-cloud',
-      Key: transciptionName,
+      Key: transcriptionName,
     });
 
     try {
