@@ -1,4 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class Score {
@@ -16,4 +21,7 @@ export class Score {
 
   @Column()
   userScore: number;
+
+  @CreateDateColumn()
+  createdWhen: Date;
 }

@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RequestHistory } from '../schema/requestHistory.entity';
 import { Score } from '../schema/score.entity';
-import { ScoreBoard } from '../schema/scoreBoard.entity';
 import { Repository, DeleteResult, UpdateResult } from 'typeorm';
 import { AudioRequestDto } from '../dto/audioRequest.dto';
 import { ScoreRequestDto } from '../dto/scoreRequest.dto';
@@ -52,8 +51,6 @@ export class ScoreService {
     private readonly requestHistoryRepository: Repository<RequestHistory>,
     @InjectRepository(Score)
     private readonly scoreRepository: Repository<Score>,
-    @InjectRepository(ScoreBoard)
-    private readonly scoreBoardRepository: Repository<ScoreBoard>, // private readonly httpService: HttpService,
     private readonly util: UtilService,
   ) {}
   private readonly scoreLogger = new Logger('ScoreService');
@@ -232,7 +229,7 @@ export class ScoreService {
       .createQueryBuilder('Score')
       .where((audioNumber = audioNumber))
       .orderBy('userScore', 'DESC')
-      .addOrderBy('id', 'ASC')
+      .addOrderBy('createdWhen', 'ASC')
       .distinct(true)
       .take(3)
       .getMany();
