@@ -133,8 +133,12 @@ export class ScoreService {
           })
           .on('end', () => {
             // fs.writeFileSync(`${fileName}${fileType}`, d);
-            this.scoreLogger.log('test2.5');
-            resolve(x);
+            const y = fs
+              .readWriteStream(`${fileName}${fileType}`)
+              .on('finish', () => {
+                this.scoreLogger.log('test2.5');
+                resolve(y);
+              });
           });
       });
     };
