@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RequestHistory } from './schema/requestHistory.entity';
 import { Score } from './schema/score.entity';
-import { ScoreBoard } from './schema/scoreBoard.entity';
 import { ScoreModule } from './score/score.module';
 
 require('dotenv').config();
@@ -18,7 +17,7 @@ require('dotenv').config();
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [RequestHistory, Score, ScoreBoard],
+      entities: [RequestHistory, Score],
       synchronize: true,
     }),
     ScoreModule,
