@@ -30,6 +30,6 @@ export class ScoreController {
 
   @Get('/scoreboard/:audioNumber')
   async getScoreBoard(@Param() audioNumber: number): Promise<Array<Score>> {
-    return await this.scoreService.getScoreBoard(audioNumber.toString());
+    return await this.scoreService.getScoreBoard(String(audioNumber));
   }
 }
