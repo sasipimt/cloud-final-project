@@ -29,7 +29,9 @@ export class ScoreController {
   }
 
   @Get('/scoreboard/:audioNumber')
-  async getScoreBoard(@Param() audioNumber: number): Promise<Array<Score>> {
-    return await this.scoreService.getScoreBoard(String(audioNumber));
+  async getScoreBoard(
+    @Param('audioNumber') audioNumber: Number,
+  ): Promise<Array<Score>> {
+    return await this.scoreService.getScoreBoard(audioNumber.toString());
   }
 }
