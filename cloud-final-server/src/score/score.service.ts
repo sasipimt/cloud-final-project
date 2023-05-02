@@ -174,9 +174,9 @@ export class ScoreService {
       transcriptionWords.map((w) => {
         words = words + w;
       });
-      const p = 'นี่คือข้อหนึ่ง';
-      const lcs = new LCS(p, words);
-      const score = Math.floor((lcs.getLength() * 100) / p.length);
+      const sentence = this.util.getSentences(Number(oldUserReq.audioNumber));
+      const lcs = new LCS(sentence, words);
+      const score = Math.floor((lcs.getLength() * 100) / sentence.length);
 
       this.scoreLogger.log('test19', lcs.getLength());
       this.scoreLogger.log('score', score);
