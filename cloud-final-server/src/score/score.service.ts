@@ -146,20 +146,22 @@ export class ScoreService {
     const transcriptionStatus = await this.getTranscriptionStatus(jobName);
 
     if (transcriptionStatus !== 'COMPLETED') {
+      this.scoreLogger.log('transcriptionStatus', transcriptionStatus);
       if (transcriptionStatus === 'FAILED') {
+        this.scoreLogger.log('transcriptionStatus', transcriptionStatus);
         return {
           score: 0,
           transcription: 'TRANSCRIPTION FAILED',
           audioNumber: oldUserReq.audioNumber,
         };
       }
-      if (transcriptionStatus === 'IN_PROGRESS') {
-        this.util.replyProgress({
-          jobName: jobName,
-          replyToken: scoreRequestDto.replyToken,
-        });
-      }
+
+      this.util.replyProgress({
+        jobName: jobName,
+        replyToken: scoreRequestDto.replyToken,
+      });
     } else {
+      this.scoreLogger.log('transcriptionStatus', transcriptionStatus);
       const transcription = await this.s3GetObject(`${jobName}.json`);
       const transcriptionJSON = JSON.parse(transcription);
       let transcriptionWords = [];
