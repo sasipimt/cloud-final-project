@@ -296,7 +296,7 @@ export class ScoreService {
   ): Promise<string> {
     this.scoreLogger.log('test15');
     const params = {
-      TranscriptionJobName: `TRANSCIBE_${scoreRequestDto.messageId}`,
+      TranscriptionJobName: `TRANSCRIBE_${scoreRequestDto.messageId}`,
       LanguageCode: 'th-TH',
       MediaFormat: 'mp4',
       Media: {
@@ -312,7 +312,7 @@ export class ScoreService {
 
       this.scoreLogger.log('Success - put', data);
       // return { score: data }; // For unit tests.
-      return `TRANSCIBE_${scoreRequestDto.messageId}`;
+      return `TRANSCRIBE_${scoreRequestDto.messageId}`;
     } catch (err) {
       this.scoreLogger.log('Error', err);
     }
