@@ -172,10 +172,12 @@ export class ScoreService {
       // await this.s3DeleteObject(`${fileName}.mp4`);
       let words = '';
       transcriptionWords.map((w) => {
-        words = words + w;
+        if (words.length < 100) {
+          words = words + w;
+        }
       });
       const sentence = this.util.getSentences(Number(oldUserReq.audioNumber));
-      const lcs = new LCS(sentence, words.slice(0, 100));
+      const lcs = new LCS(sentence, words);
       const score = Math.floor((lcs.getLength() * 100) / sentence.length);
 
       // this.scoreLogger.log('test19', lcs.getLength());
