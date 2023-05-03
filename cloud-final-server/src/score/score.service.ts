@@ -145,9 +145,9 @@ export class ScoreService {
     const transcriptionStatus = await this.getTranscriptionStatus(jobName);
 
     if (transcriptionStatus !== 'COMPLETED') {
-      this.scoreLogger.log('transcriptionStatus', transcriptionStatus);
+      // this.scoreLogger.log('transcriptionStatus', transcriptionStatus);
       if (transcriptionStatus === 'FAILED') {
-        this.scoreLogger.log('transcriptionStatus', transcriptionStatus);
+        // this.scoreLogger.log('transcriptionStatus', transcriptionStatus);
         return {
           score: 0,
           transcription: 'TRANSCRIPTION FAILED',
@@ -160,7 +160,7 @@ export class ScoreService {
         replyToken: scoreRequestDto.replyToken,
       });
     } else {
-      this.scoreLogger.log('transcriptionStatus', transcriptionStatus);
+      // this.scoreLogger.log('transcriptionStatus', transcriptionStatus);
       const transcription = await this.s3GetObject(`${jobName}.json`);
       const transcriptionJSON = JSON.parse(transcription);
       let transcriptionWords = [];
@@ -175,12 +175,12 @@ export class ScoreService {
         words = words + w;
       });
       const sentence = this.util.getSentences(Number(oldUserReq.audioNumber));
-      const lcs = new LCS(sentence, words);
+      const lcs = new LCS(sentence, words.slice(0, 100));
       const score = Math.floor((lcs.getLength() * 100) / sentence.length);
 
-      this.scoreLogger.log('test19', lcs.getLength());
-      this.scoreLogger.log('score', score);
-      this.scoreLogger.log('seq', lcs.getSequences());
+      // this.scoreLogger.log('test19', lcs.getLength());
+      // this.scoreLogger.log('score', score);
+      // this.scoreLogger.log('seq', lcs.getSequences());
 
       const oldUserScore = await this.scoreRepository.findOneBy({
         userId: scoreRequestDto.userId,
@@ -201,12 +201,12 @@ export class ScoreService {
           newScore.userScore = score;
           newScore.createdWhen = new Date();
           await this.scoreRepository.update(oldUserScore.id, newScore);
-          this.scoreLogger.log('new High score', JSON.stringify(newScore));
+          // this.scoreLogger.log('new High score', JSON.stringify(newScore));
         }
-        this.scoreLogger.log('new score == old score');
+        // this.scoreLogger.log('new score == old score');
       } else {
         await this.saveScore(scoreRequestDto.userId, score);
-        this.scoreLogger.log('new score score', JSON.stringify(newScore));
+        // this.scoreLogger.log('new score score', JSON.stringify(newScore));
       }
       // await this.s3DeleteObject(`${jobName}.json`);
       const scoreBoard = await this.getScoreBoard(oldUserReq.audioNumber);
@@ -237,14 +237,7 @@ export class ScoreService {
       },
       take: 3,
     });
-    // .createQueryBuilder('score')
-    // .where('score.audioNumber = :audioNumber', { audioNumber: audioNumber })
-    // .orderBy('Score.userScore', 'DESC')
-    // .addOrderBy('Score.createdWhen', 'ASC')
-    // .distinct(true)
-    // .take(3)
-    // .getMany();
-    this.scoreLogger.log('scoreBoard', scoreBoard);
+    // this.scoreLogger.log('scoreBoard', scoreBoard);
     return scoreBoard;
   }
 
@@ -282,7 +275,7 @@ export class ScoreService {
           '/' +
           s3Params.Key,
       );
-      this.scoreLogger.log('S3put', results);
+      // this.scoreLogger.log('S3put', results);
       return fileName;
     } catch (err) {
       this.scoreLogger.log('Error', err);
@@ -339,7 +332,7 @@ export class ScoreService {
       const response = await s3Client.send(command);
       // The Body object also has 'transformToByteArray' and 'transformToWebStream' methods.
       const str = await response.Body.transformToString();
-      console.log(str);
+      // console.log(str);
       return str;
     } catch (err) {
       console.error(err);
