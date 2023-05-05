@@ -2,13 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RequestHistory } from '../schema/requestHistory.entity';
 import { Score } from '../schema/score.entity';
-import { Repository, DeleteResult, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { AudioRequestDto } from '../dto/audioRequest.dto';
 import { ScoreRequestDto } from '../dto/scoreRequest.dto';
-import { HttpService } from '@nestjs/axios';
-import { Observable, firstValueFrom } from 'rxjs';
-import { AxiosResponse, AxiosRequestConfig } from 'axios';
-import { config } from 'process';
 import { AudioResponseDto } from 'src/dto/audioResponse.dto';
 import { ScoreResponseDto } from 'src/dto/scoreResponse.dto';
 import {
@@ -23,18 +19,10 @@ import {
 } from '@aws-sdk/client-s3';
 import { Client } from '@line/bot-sdk';
 import { UtilService } from 'src/util/util.service';
-import { resolve } from 'path';
 import { SubmitRequestDto } from 'src/dto/submitRequest.dto';
 import { SubmitResponseDto } from 'src/dto/submitResponse.dto';
 
-const speech = require('@google-cloud/speech');
-const line = require('@line/bot-sdk');
 const fs = require('fs');
-const fsp = fs.promises;
-const path = require('path');
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-const ffmpeg = require('fluent-ffmpeg');
-ffmpeg.setFfmpegPath(ffmpegPath);
 const { TranscribeClient } = require('@aws-sdk/client-transcribe');
 require('dotenv').config();
 const REGION = 'us-east-2';
@@ -42,7 +30,6 @@ const s3Client = new S3Client({ region: REGION });
 const fileType = '.mp4';
 const request = require('request-promise');
 const LCS = require('lcs');
-const toWav = require('audiobuffer-to-wav');
 
 @Injectable()
 export class ScoreService {
@@ -134,7 +121,6 @@ export class ScoreService {
   }
 
   async getScore(scoreRequestDto: ScoreRequestDto): Promise<ScoreResponseDto> {
-    this.scoreLogger.log('start get score');
     const oldUserReq = await this.requestHistoryRepository.findOne({
       where: [{ userId: scoreRequestDto.userId }],
       order: { id: 'DESC' },
@@ -145,9 +131,7 @@ export class ScoreService {
     const transcriptionStatus = await this.getTranscriptionStatus(jobName);
 
     if (transcriptionStatus !== 'COMPLETED') {
-      // this.scoreLogger.log('transcriptionStatus', transcriptionStatus);
       if (transcriptionStatus === 'FAILED') {
-        // this.scoreLogger.log('transcriptionStatus', transcriptionStatus);
         return {
           score: 0,
           transcription: 'TRANSCRIPTION FAILED',
@@ -160,7 +144,6 @@ export class ScoreService {
         replyToken: scoreRequestDto.replyToken,
       });
     } else {
-      // this.scoreLogger.log('transcriptionStatus', transcriptionStatus);
       const transcription = await this.s3GetObject(`${jobName}.json`);
       const transcriptionJSON = JSON.parse(transcription);
       let transcriptionWords = [];
@@ -169,7 +152,6 @@ export class ScoreService {
           transcriptionWords.push(item.alternatives[0].content);
         }
       }
-      // await this.s3DeleteObject(`${fileName}.mp4`);
       let words = '';
       transcriptionWords.map((w) => {
         if (words.length < 100) {
@@ -219,7 +201,6 @@ export class ScoreService {
     }
   }
   async getScoreBoard(audioNumber: string): Promise<Array<Score>> {
-    this.scoreLogger.log('audioNumber: ', audioNumber);
     const scoreBoard = await this.scoreRepository.find({
       where: {
         audioNumber: audioNumber,
