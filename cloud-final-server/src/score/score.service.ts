@@ -180,10 +180,6 @@ export class ScoreService {
       const lcs = new LCS(sentence, words);
       const score = Math.floor((lcs.getLength() * 100) / sentence.length);
 
-      // this.scoreLogger.log('test19', lcs.getLength());
-      // this.scoreLogger.log('score', score);
-      // this.scoreLogger.log('seq', lcs.getSequences());
-
       const oldUserScore = await this.scoreRepository.findOneBy({
         userId: scoreRequestDto.userId,
         audioNumber: oldUserReq.audioNumber,
@@ -193,7 +189,6 @@ export class ScoreService {
       newScore.userDisplayName = oldUserReq.userDisplayName;
       newScore.userId = oldUserReq.userId;
       newScore.userScore = score;
-      // this.scoreLogger.log('oldUserReq', JSON.stringify(oldUserReq));
       if (oldUserScore !== null) {
         if (score > oldUserScore.userScore) {
           let newScore = new Score();
@@ -203,14 +198,10 @@ export class ScoreService {
           newScore.userScore = score;
           newScore.createdWhen = new Date();
           await this.scoreRepository.update(oldUserScore.id, newScore);
-          // this.scoreLogger.log('new High score', JSON.stringify(newScore));
         }
-        // this.scoreLogger.log('new score == old score');
       } else {
         await this.saveScore(scoreRequestDto.userId, score);
-        // this.scoreLogger.log('new score score', JSON.stringify(newScore));
       }
-      // await this.s3DeleteObject(`${jobName}.json`);
       const scoreBoard = await this.getScoreBoard(oldUserReq.audioNumber);
       await this.util.replyScoreAndScoreBoard({
         ranking: scoreBoard,
@@ -239,7 +230,6 @@ export class ScoreService {
       },
       take: 3,
     });
-    // this.scoreLogger.log('scoreBoard', scoreBoard);
     return scoreBoard;
   }
 
@@ -277,7 +267,6 @@ export class ScoreService {
           '/' +
           s3Params.Key,
       );
-      // this.scoreLogger.log('S3put', results);
       return fileName;
     } catch (err) {
       this.scoreLogger.log('Error', err);
@@ -289,7 +278,6 @@ export class ScoreService {
     scoreRequestDto: SubmitRequestDto,
     fileName: string,
   ): Promise<string> {
-    this.scoreLogger.log('test15');
     const params = {
       TranscriptionJobName: `TRANSCRIBE_${scoreRequestDto.messageId}`,
       LanguageCode: 'th-TH',
@@ -306,7 +294,6 @@ export class ScoreService {
       );
 
       this.scoreLogger.log('Success - put', data);
-      // return { score: data }; // For unit tests.
       return `TRANSCRIBE_${scoreRequestDto.messageId}`;
     } catch (err) {
       this.scoreLogger.log('Error', err);
@@ -316,8 +303,7 @@ export class ScoreService {
   async getTranscriptionStatus(jobName: string): Promise<string> {
     const client = new TranscribeClient({ region: REGION });
     const input = {
-      // GetTranscriptionJobRequest
-      TranscriptionJobName: jobName, // required
+      TranscriptionJobName: jobName,
     };
     const command = new GetTranscriptionJobCommand(input);
     const response = await client.send(command);
@@ -332,9 +318,7 @@ export class ScoreService {
 
     try {
       const response = await s3Client.send(command);
-      // The Body object also has 'transformToByteArray' and 'transformToWebStream' methods.
       const str = await response.Body.transformToString();
-      // console.log(str);
       return str;
     } catch (err) {
       console.error(err);
@@ -349,7 +333,7 @@ export class ScoreService {
     try {
       const data = await s3Client.send(command);
       console.log('Success. Object deleted.', data);
-      return 'Object deleted'; // For unit tests.
+      return 'Object deleted';
     } catch (err) {
       console.log('Error', err);
     }
